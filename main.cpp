@@ -63,10 +63,14 @@ int main()
     n.push_back({{"Tres", 7}, {"Cuatro", 8}, {"Cinco", 9}});
 
     for (size_t i = 0; i < n.size(); i++)
-        std::cout << print_pair<std::string, int>(n.at(i)) << std::endl;
+        std::cout << print_pair<std::string, int>(*(n.at(i))) << std::endl;
 
     for (auto i : n) 
         std::cout << print_pair<std::string, int>(i) << " ; " << print_map<std::string, int, 3>(n) << std::endl;
 
-    std::cout << n.find_first("Cuatro").first << " " << n.find_first("Cuatro").second << std::endl;
+    std::cout << n.find_first("Cuatro").first->first << " " << n.find_first("Cuatro").second << std::endl;
+
+    std::vector<std::pair<unsorted_map<std::string, int, 3>::pointer, size_t>> f = n.find_all("Cuatro");
+    for (auto i : f)
+        std::cout << i.first->first << " " << i.second << std::endl;
 }

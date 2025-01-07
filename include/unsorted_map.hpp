@@ -25,6 +25,8 @@ class unsorted_map {
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using size_type = size_t;
+        
+        size_type npos = -1;
 
         class Iterator {
             public:
@@ -57,19 +59,21 @@ class unsorted_map {
         void push_back(const value_type& val);
         void push_back(const key_type& key, const mapped_type& val);
         void push_back(const std::initializer_list<value_type> il);
-        void insert(const value_type& val, size_type pos);
+        void insert(const value_type& val, const size_type pos);
+        void insert(const std::initializer_list<value_type> il, const size_type pos);
         void clear();
         void erase(key_type key);
         void swap(size_type from, size_type to);
         void move(size_type from, size_type to);
-        value_type copy();
+        unsorted_map<K, V, D> copy();
+        unsorted_map<K, V, D> move();
 
         // Element access
-        value_type at(size_type pos) { return pos < size_ ? data_[pos] : throw std::out_of_range("Out of range"); }
-        std::pair<mapped_type, size_type> find_first(key_type key);
-        auto find_all(key_type key);
+        pointer at(size_type pos) { return pos < size_ ? &data_[pos] : throw std::out_of_range("Out of range"); }
+        auto find_first(key_type key);  // return type : std::pair<pointer, size_type>
+        auto find_all(key_type key);  // return type : std::vector<std::pair<pointer, size_type>>
         pointer data() { return data_; }
-        value_type operator[](size_type pos) { at(pos); }
+        pointer operator[](size_type pos) { at(pos); }
         
         // Memory related members
         size_type size() { return size_; }
@@ -160,20 +164,22 @@ inline void unsorted_map<K, V, D>::push_back(const std::initializer_list<value_t
 }
 
 template <Keyable K, class V, size_t D>
-inline std::pair<typename unsorted_map<K, V, D>::mapped_type, typename unsorted_map<K, V, D>::size_type> unsorted_map<K, V, D>::find_first(key_type key) {
+inline auto unsorted_map<K, V, D>::find_first(key_type key) {
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key)
-            return std::make_pair<>(data_[i].second, i);
+            return std::make_pair<>(&data_[i], i);
 
-    return std::make_pair<>(mapped_type(), -1);
+    return std::make_pair<>(&data_[0], npos);
 }
 
 template <Keyable K, class V, size_t D>
 inline auto unsorted_map<K, V, D>::find_all(key_type key) {
-    std::vector<std::pair<mapped_type, size_type>> out();
+    std::vector<std::pair<pointer, size_type>> out;
     for (size_type i = 0; i < size_; i++)
-        if (data_[i].first == key)
-            out.push_back(std::make_pair<>(data_[i].second, i));
+        if (data_[i].first == key) {
+            std::pair<pointer, size_type> p = std::make_pair<pointer, size_type>(std::forward<pointer>(&data_[i]), std::forward<size_type>(i));
+            out.push_back(p);
+        }
 
     return out;
 }
