@@ -68,5 +68,5 @@ int main()
     for (auto i : n) 
         std::cout << print_pair<std::string, int>(i) << " ; " << print_map<std::string, int, 3>(n) << std::endl;
 
-    std::cout << n.find_first("Tres") << std::endl;
+    std::cout << n.find_first("Cuatro").first << " " << n.find_first("Cuatro").second << std::endl;
 }
