@@ -55,12 +55,14 @@ class unsorted_map {
 
         // Element management
         void push_back(const value_type& val);
+        void push_back(const key_type& key, const mapped_type& val);
         void push_back(const std::initializer_list<value_type> il);
-        std::pair<pointer, bool> insert(const value_type& val, size_type pos);
+        void insert(const value_type& val, size_type pos);
         void clear();
         void erase(key_type key);
         void swap(size_type from, size_type to);
         void move(size_type from, size_type to);
+        value_type copy();
 
         // Element access
         value_type at(size_type pos) { return pos < size_ ? data_[pos] : throw std::out_of_range("Out of range"); }
@@ -79,6 +81,7 @@ class unsorted_map {
         // Iterators
         Iterator begin() { return Iterator(data_); }
         Iterator end() { return Iterator(data_ + size_); }
+        Iterator last() { return Iterator(data_ + size_ - 1); }
 
     private:
         allocator_type allocator_;
@@ -133,6 +136,12 @@ inline void unsorted_map<K, V, D>::push_back(const value_type &val) {
         allocator_traits::construct(allocator_, data_ + size_, val);
         size_++;
     }
+}
+
+template <Keyable K, class V, size_t D>
+inline void unsorted_map<K, V, D>::push_back(const key_type &key, const mapped_type &val) {
+    value_type v = std::make_pair<K, V>(key, val);
+    push_back(v);
 }
 
 template <Keyable K, class V, size_t D>
