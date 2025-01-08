@@ -30,7 +30,7 @@ class unsorted_map {
 
         class ConstIterator {
             public:
-                using iterator_category = std::forward_iterator_tag;
+                using iterator_category = std::bidirectional_iterator_tag;
                 using value_type = const unsorted_map::value_type;
                 using difference_type = std::ptrdiff_t;
                 using pointer = const value_type*;
@@ -52,7 +52,7 @@ class unsorted_map {
 
         class Iterator {
             public:
-                using iterator_category = std::forward_iterator_tag;
+                using iterator_category = std::bidirectional_iterator_tag;
                 using value_type = typename unsorted_map::value_type;
                 using difference_type = std::ptrdiff_t;
                 using pointer = value_type*;
