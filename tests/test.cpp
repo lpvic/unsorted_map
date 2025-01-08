@@ -23,17 +23,17 @@ int main() {
 
     std::cout << "* Inserting elements:" << std::endl;
     std::cout << "  push_back(pair) -> ";
-    umap::pointer ptr = n.push_back(std::make_pair<std::string, size_t>("Cuatro", 4));
-    std::cout << "Addr: " << ptr << " / (\"" << ptr->first << " , " << ptr->second << "\") ";
+    umap::iterator it = n.push_back(std::make_pair<std::string, size_t>("Cuatro", 4));
+    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << " , " << it->second << "\") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
     std::cout << "  push_back(string, int) -> ";
-    ptr = n.push_back("Cinco", 5);
-    std::cout << "Addr: " << ptr << " / (\"" << ptr->first << " , " << ptr->second << "\") ";
+    it = n.push_back("Cinco", 5);
+    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << " , " << it->second << "\") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
     std::cout << "  push_back(unsorted_map) -> ";
     m.reserve(10);
     m.push_back({{"Seis", 6}, {"Siete", 7}});
-    ptr = n.push_back(m);
-    std::cout << "Addr: " << ptr << " / (\"" << ptr->first << " , " << ptr->second << "\") ";
+    it = n.push_back(m);
+    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << " , " << it->second << "\") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
 }

@@ -24,11 +24,31 @@ class unsorted_map {
         using const_reference = const value_type&;
         using pointer = value_type*;
         using const_pointer = const value_type*;
-        using iterator = Iterator;
-        using const_iterator = ConstIterator;
         using size_type = size_t;
         
         size_type npos = -1;
+
+        class ConstIterator {
+            public:
+                using iterator_category = std::forward_iterator_tag;
+                using value_type = const unsorted_map::value_type;
+                using difference_type = std::ptrdiff_t;
+                using pointer = const value_type*;
+                using reference = const value_type&;
+
+                ConstIterator(pointer ptr) : ptr_(ptr) {}
+                reference operator*() const { return *ptr_; }
+                pointer operator->() const { return ptr_; }
+                ConstIterator& operator++() { ++ptr_; return *this; }
+                ConstIterator operator++(int) { ConstIterator tmp = *this; ++ptr_; return tmp; }
+                ConstIterator& operator--() { --ptr_; return *this; }
+                ConstIterator operator--(int) { ConstIterator tmp = *this; --ptr_; return tmp; }
+                bool operator==(const ConstIterator& other) const = default;
+                bool operator!=(const ConstIterator& other) const = default;
+
+            private:
+                pointer ptr_;
+        };
 
         class Iterator {
             public:
@@ -55,27 +75,10 @@ class unsorted_map {
                 friend class ConstIterator;
         };
 
-        class ConstIterator {
-            public:
-                using iterator_category = std::forward_iterator_tag;
-                using value_type = const unsorted_map::value_type;
-                using difference_type = std::ptrdiff_t;
-                using pointer = const value_type*;
-                using reference = const value_type&;
+        
 
-                ConstIterator(pointer ptr) : ptr_(ptr) {}
-                reference operator*() const { return *ptr_; }
-                pointer operator->() const { return ptr_; }
-                ConstIterator& operator++() { ++ptr_; return *this; }
-                ConstIterator operator++(int) { ConstIterator tmp = *this; ++ptr_; return tmp; }
-                ConstIterator& operator--() { --ptr_; return *this; }
-                ConstIterator operator--(int) { ConstIterator tmp = *this; --ptr_; return tmp; }
-                bool operator==(const ConstIterator& other) const = default;
-                bool operator!=(const ConstIterator& other) const = default;
-
-            private:
-                pointer ptr_;
-        };
+        using iterator = Iterator;
+        using const_iterator = ConstIterator;
         
         // Constructors and destructors
         unsorted_map();
@@ -83,21 +86,21 @@ class unsorted_map {
         ~unsorted_map();
 
         // Element addition
-        pointer push_back(const value_type& val);
-        pointer push_back(const key_type& key, const mapped_type& val);
-        pointer push_back(const std::initializer_list<value_type>& il);
-        pointer push_back(const unsorted_map<key_type, mapped_type>& map);
-        pointer insert(const value_type& val, const size_type pos);
-        pointer insert(const key_type& key, const mapped_type& val, const size_type pos);
-        pointer insert(const std::initializer_list<value_type> il, const size_type pos);
-        pointer insert(const unsorted_map<key_type, mapped_type> map, const size_type pos);
+        iterator push_back(const value_type& val);
+        iterator push_back(const key_type& key, const mapped_type& val);
+        iterator push_back(const std::initializer_list<value_type>& il);
+        iterator push_back(const unsorted_map<key_type, mapped_type>& map);
+        iterator insert(const value_type& val, const size_type pos);
+        iterator insert(const key_type& key, const mapped_type& val, const size_type pos);
+        iterator insert(const std::initializer_list<value_type> il, const size_type pos);
+        iterator insert(const unsorted_map<key_type, mapped_type> map, const size_type pos);
 
         // Element access
-        pointer at(const size_type pos) { return pos < size_ ? &data_[pos] : throw std::out_of_range("Out of range"); }
-        auto at(const key_type key);  // return type : std::pair<pointer, size_type>
-        auto all(const key_type key);  // return type : std::vector<std::pair<pointer, size_type>>
-        pointer data() { return data_; }
-        pointer operator[](const size_type pos) { at(pos); }
+        iterator at(const size_type pos) { return pos < size_ ? &data_[pos] : throw std::out_of_range("Out of range"); }
+        auto at(const key_type key);  // return type : std::pair<iterator, size_type>
+        auto all(const key_type key);  // return type : std::vector<std::pair<iterator, size_type>>
+        iterator data() { return data_; }
+        iterator operator[](const size_type pos) { at(pos); }
         auto operator[](const key_type key) { at(key); }
 
         // Element management
@@ -167,7 +170,7 @@ inline unsorted_map<K, V, D>::~unsorted_map() {
 }
 
 template <Keyable K, class V, size_t D>
-inline unsorted_map<K, V, D>::pointer unsorted_map<K, V, D>::push_back(const value_type& val) {
+inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const value_type& val) {
     bool success = true;
     
     if (size_ == capacity_)
@@ -175,20 +178,20 @@ inline unsorted_map<K, V, D>::pointer unsorted_map<K, V, D>::push_back(const val
     
     if (success) {
         allocator_traits::construct(allocator_, data_ + size_, val);
-        return &data_[size_++];
+        return iterator(&data_[size_++]);
     }
     else
-        return pointer();
+        return iterator(data_ + size_);
 }
 
 template <Keyable K, class V, size_t D>
-inline unsorted_map<K, V, D>::pointer unsorted_map<K, V, D>::push_back(const key_type& key, const mapped_type& val) {
+inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const key_type& key, const mapped_type& val) {
     value_type v = std::make_pair<>(key, val);
     return push_back(v);
 }
 
 template <Keyable K, class V, size_t D>
-inline unsorted_map<K, V, D>::pointer unsorted_map<K, V, D>::push_back(const std::initializer_list<value_type>& il) {
+inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const std::initializer_list<value_type>& il) {
     bool success = true;
 
     if ((size_ + il.size()) > capacity_)
@@ -199,14 +202,14 @@ inline unsorted_map<K, V, D>::pointer unsorted_map<K, V, D>::push_back(const std
             allocator_traits::construct(allocator_, data_ + size_, elem);
             size_++;
         }
-        return &data_[size_ - il.size()];
+        return iterator(&data_[size_ - il.size()]);
     }    
     else
-        return pointer();
+        return iterator(data_ + size_);
 }
 
 template <Keyable K, class V, size_t D>
-inline unsorted_map<K, V, D>::pointer unsorted_map<K, V, D>::push_back(const unsorted_map<key_type, mapped_type>& map) {
+inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const unsorted_map<key_type, mapped_type>& map) {
     bool success = true;
 
     if ((size_ + map.size_) > capacity_)
@@ -217,28 +220,28 @@ inline unsorted_map<K, V, D>::pointer unsorted_map<K, V, D>::push_back(const uns
             allocator_traits::construct(allocator_, data_ + size_, elem);
             size_++;
         }
-        return &data_[size_ - map.size_];
+        return iterator(&data_[size_ - map.size_]);
     }
     else
-        return pointer();
+        return iterator(data_ + size_);
 }
 
 template <Keyable K, class V, size_t D>
 inline auto unsorted_map<K, V, D>::at(const key_type key) {
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key)
-            return std::make_pair<>(&data_[i], i);
+            return std::make_pair<>(iterator(&data_[i]), i);
 
-    return std::make_pair<>(&data_[0], npos);
+    return std::make_pair<>(iterator(), npos);
 }
 
 template <Keyable K, class V, size_t D>
 inline auto unsorted_map<K, V, D>::all(const key_type key) {
-    std::vector<std::pair<pointer, size_type>> out;
+    std::vector<std::pair<iterator, size_type>> out;
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key) {
             //std::pair<pointer, size_type> p = std::make_pair<pointer, size_type>(std::forward<pointer>(&data_[i]), std::forward<size_type>(i));
-            std::pair<pointer, size_type> p = std::make_pair<>(&data_[i], i);
+            std::pair<iterator, size_type> p = std::make_pair<>(&data_[i], i);
             out.push_back(p);
         }
 
