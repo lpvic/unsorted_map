@@ -8,13 +8,18 @@
 #include <utility> // For std::pair
 #include <vector>
 #include <type_traits>
+#include <ranges>
 
 template<class T>
 concept Keyable = (requires(T a, T b) {a == b;}) && (!std::is_integral<T>::value);
 
 template<Keyable K, class V, size_t D = 100>
-class unsorted_map {
+class unsorted_map
+{
     public:
+        class Iterator;
+        class ConstIterator;
+
         using key_type = K;
         using mapped_type = V;
         using value_type = std::pair<const key_type, mapped_type>;
@@ -24,9 +29,38 @@ class unsorted_map {
         using const_reference = const value_type&;
         using pointer = value_type*;
         using const_pointer = const value_type*;
+        using iterator = Iterator;
+        using const_iterator = ConstIterator;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using size_type = size_t;
         
-        size_type npos = -1;
+        const size_type npos = -1;
+
+        class Iterator {
+            public:
+                using iterator_category = std::bidirectional_iterator_tag;
+                using value_type = typename unsorted_map::value_type;
+                using difference_type = std::ptrdiff_t;
+                using pointer = value_type*;
+                using reference = value_type&;
+
+                Iterator(pointer ptr) : ptr_(ptr) {}
+                reference operator*() const { return *ptr_; }
+                pointer operator->() const { return ptr_; }
+                iterator& operator++() { ++ptr_; return *this; }
+                iterator operator++(int) { iterator tmp = *this; ++ptr_; return tmp; }
+                iterator& operator--() { --ptr_; return *this; }
+                iterator operator--(int) { iterator tmp = *this; --ptr_; return tmp; }
+                bool operator==(const iterator& other) const = default;
+                bool operator!=(const iterator& other) const = default;
+
+                operator ConstIterator() const { return ConstIterator(ptr_); }
+
+            private:
+                pointer ptr_;
+                friend class ConstIterator;
+        };
 
         class ConstIterator {
             public:
@@ -48,37 +82,7 @@ class unsorted_map {
 
             private:
                 pointer ptr_;
-        };
-
-        class Iterator {
-            public:
-                using iterator_category = std::bidirectional_iterator_tag;
-                using value_type = typename unsorted_map::value_type;
-                using difference_type = std::ptrdiff_t;
-                using pointer = value_type*;
-                using reference = value_type&;
-
-                Iterator(pointer ptr) : ptr_(ptr) {}
-                reference operator*() const { return *ptr_; }
-                pointer operator->() const { return ptr_; }
-                Iterator& operator++() { ++ptr_; return *this; }
-                Iterator operator++(int) { Iterator tmp = *this; ++ptr_; return tmp; }
-                Iterator& operator--() { --ptr_; return *this; }
-                Iterator operator--(int) { Iterator tmp = *this; --ptr_; return tmp; }
-                bool operator==(const Iterator& other) const = default;
-                bool operator!=(const Iterator& other) const = default;
-
-                operator ConstIterator() const { return ConstIterator(ptr_); }
-
-            private:
-                pointer ptr_;
-                friend class ConstIterator;
-        };
-
-        
-
-        using iterator = Iterator;
-        using const_iterator = ConstIterator;
+        };        
         
         // Constructors and destructors
         unsorted_map();
@@ -96,10 +100,10 @@ class unsorted_map {
         iterator insert(const unsorted_map<key_type, mapped_type> map, const size_type pos);
 
         // Element access
-        iterator at(const size_type pos) { return pos < size_ ? &data_[pos] : throw std::out_of_range("Out of range"); }
+        iterator at(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : throw std::out_of_range("Out of range"); }
         auto at(const key_type key);  // return type : std::pair<iterator, size_type>
         auto all(const key_type key);  // return type : std::vector<std::pair<iterator, size_type>>
-        iterator data() { return data_; }
+        pointer data() { return data_; }
         iterator operator[](const size_type pos) { at(pos); }
         auto operator[](const key_type key) { at(key); }
 
@@ -117,23 +121,31 @@ class unsorted_map {
         allocator_type get_allocator() { return allocator_; }
         bool reserve(size_type min_capacity);
         bool shrink();
+        bool resize(size_type new_capacity);
 
         // Iterators
-        Iterator begin() { return Iterator(data_); }
-        Iterator end() { return Iterator(data_ + size_); }
-        Iterator last() { return Iterator(data_ + size_ - 1); }
+        iterator begin() { return iterator(data_); }
+        iterator end() { return iterator(data_ + size_); }
+        iterator last() { return iterator(data_ + size_ - 1); }
+        reverse_iterator rbegin() { return reverse_iterator(data_ + size_); }
+        reverse_iterator rend() { return reverse_iterator(data_); }
 
-        ConstIterator begin() const { return ConstIterator(data_); }
-        ConstIterator end() const { return ConstIterator(data_ + size_); }
-        ConstIterator last() const { return ConstIterator(data_ + size_ - 1); }
+
+        const_iterator begin() const { return const_iterator(data_); }
+        const_iterator end() const { return const_iterator(data_ + size_); }
+        const_iterator cbegin() const { return const_iterator(data_); }
+        const_iterator cend() const { return const_iterator(data_ + size_); }
+        const_iterator last() const { return const_iterator(data_ + size_ - 1); }
+        const_reverse_iterator rbegin() const { return const_reverse_iterator(data_); }
+        const_reverse_iterator rend() const { return const_reverse_iterator(data_ + size_); }
+        const_reverse_iterator crbegin() const { return const_reverse_iterator(data_ + size_); }
+        const_reverse_iterator crbend() const { return const_reverse_iterator(data_); }
 
     private:
         allocator_type allocator_;
         size_type size_;
         size_type capacity_;
         pointer data_;
-
-        bool reallocate(size_type new_capacity);
 };
 
 template <Keyable K, class V, size_t D>
@@ -226,13 +238,32 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const un
         return iterator(data_ + size_);
 }
 
+template <Keyable K, class V, size_t D> 
+inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &val, const size_type pos) {
+    bool success = true;
+
+    if (size_ == capacity_)
+        success = reserve(size_ + 1);
+
+    if (success) {
+        size_++;
+        for (size_type i = size_; i > pos; --i) {
+            allocator_traits::construct(allocator_, data_ + i, data[i-1]);
+        }
+        allocator_traits::construct(allocator_, data + pos, val);
+        size++;
+    }
+
+    return iterator();
+}
+
 template <Keyable K, class V, size_t D>
 inline auto unsorted_map<K, V, D>::at(const key_type key) {
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key)
             return std::make_pair<>(iterator(&data_[i]), i);
 
-    return std::make_pair<>(iterator(), npos);
+    return std::make_pair<>(iterator(data_ + size_), npos);
 }
 
 template <Keyable K, class V, size_t D>
@@ -240,7 +271,6 @@ inline auto unsorted_map<K, V, D>::all(const key_type key) {
     std::vector<std::pair<iterator, size_type>> out;
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key) {
-            //std::pair<pointer, size_type> p = std::make_pair<pointer, size_type>(std::forward<pointer>(&data_[i]), std::forward<size_type>(i));
             std::pair<iterator, size_type> p = std::make_pair<>(&data_[i], i);
             out.push_back(p);
         }
@@ -249,21 +279,28 @@ inline auto unsorted_map<K, V, D>::all(const key_type key) {
 }
 
 template <Keyable K, class V, size_t D>
+inline void unsorted_map<K, V, D>::clear() {
+    for (size_type i = 0; i < size_; i++)
+        allocator_traits::destroy(allocator_, data_ + i);
+    size_ = 0;
+}
+
+template <Keyable K, class V, size_t D>
 inline bool unsorted_map<K, V, D>::reserve(size_type min_capacity) {
     if (min_capacity < size_)
         return false;
 
     size_type new_capacity = ((min_capacity / D) + 1) * D;
-    return reallocate(new_capacity);
+    return resize(new_capacity);
 }
 
 template <Keyable K, class V, size_t D>
 inline bool unsorted_map<K, V, D>::shrink() {
-    return reallocate(capacity_);
+    return resize(size_);
 }
 
 template <Keyable K, class V, size_t D>
-inline bool unsorted_map<K, V, D>::reallocate(size_type new_capacity) {
+inline bool unsorted_map<K, V, D>::resize(size_type new_capacity) {
     if (new_capacity < size_)
         return false;
 
