@@ -3,7 +3,7 @@
 #include <string>
 
 int main() {
-    using  umap = unsorted_map<std::string, size_t>;
+    using  umap = unsorted_map<std::string, size_t, 3>;
 
     std::cout << "Testing unsorted_map" << std::endl;
     std::cout << "====================" << std::endl;
@@ -38,4 +38,19 @@ int main() {
     it = n.push_back(m);
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    std::cout << "  insert(pair, pos) -> ";
+    it = n.insert(std::make_pair("Ocho", 8), 6);
+    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    std::cout << "  insert(string, int, pos) -> ";
+    it = n.insert("Nueve", 9, 6);
+    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+
+    std::cout << std::endl;
+    for (auto elem : n) {
+        auto at = elem;
+        std::cout << "Addr: " << &elem << " / (\"" << elem.first << "\" , " << elem.second << ") ";
+        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    }
 }
