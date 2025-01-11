@@ -157,8 +157,9 @@ inline unsorted_map<K, V, D>::unsorted_map(const std::initializer_list<value_typ
     capacity_ = D;
     size_ = 0;
 
-    if (capacity_ < il.size())
+    if (capacity_ < il.size()) {
         capacity_ = ((il.size() / D) + 1) * D;
+    }
 
     data_ = allocator_traits::allocate(allocator_, capacity_);
 
@@ -172,8 +173,9 @@ inline unsorted_map<K, V, D>::unsorted_map(const std::initializer_list<value_typ
 
 template <Keyable K, class V, size_t D>
 inline unsorted_map<K, V, D>::~unsorted_map() {
-    for (size_type i = 0; i < size_; i++)
+    for (size_type i = 0; i < size_; i++) {
         allocator_traits::destroy(allocator_, data_ + i);
+    }
 
     allocator_traits::deallocate(allocator_, data_, capacity_);
 }
@@ -182,29 +184,31 @@ template <Keyable K, class V, size_t D>
 inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const value_type& val) {
     bool success = true;
     
-    if (size_ == capacity_)
+    if (size_ == capacity_) {
         success = reserve(capacity_ + 1);
+    }
     
     if (success) {
         allocator_traits::construct(allocator_, data_ + size_, val);
         return iterator(&data_[size_++]);
     }
-    else
+    else {
         return iterator(data_ + size_);
+    }
 }
 
 template <Keyable K, class V, size_t D>
 inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const key_type& key, const mapped_type& val) {
-    value_type v = std::make_pair<>(key, val);
-    return push_back(v);
+    return push_back(std::make_pair<>(key, val));
 }
 
 template <Keyable K, class V, size_t D>
 inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const std::initializer_list<value_type>& il) {
     bool success = true;
 
-    if ((size_ + il.size()) > capacity_)
+    if ((size_ + il.size()) > capacity_) {
         success = reserve(size_ + il.size());
+    }
 
     if (success) {
         for (auto elem : il) {
@@ -213,16 +217,18 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const st
         }
         return iterator(&data_[size_ - il.size()]);
     }    
-    else
+    else {
         return iterator(data_ + size_);
+    }
 }
 
 template <Keyable K, class V, size_t D>
 inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const unsorted_map<key_type, mapped_type, D>& map) {
     bool success = true;
 
-    if ((size_ + map.size_) > capacity_)
+    if ((size_ + map.size_) > capacity_) {
         success = reserve(size_ + map.size_);
+    }
 
     if (success) {
         for (auto elem : map) {
@@ -231,28 +237,32 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const un
         }
         return iterator(&data_[size_ - map.size_]);
     }
-    else
+    else {
         return iterator(data_ + size_);
+    }
 }
 
 template <Keyable K, class V, size_t D> 
 inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &val, const size_type pos) {
     bool success = true;
 
-    if (size_ == capacity_)
+    if (size_ == capacity_) {
         success = reserve(size_ + 1);
+    }
 
     if (success) {
         size_++;
-        for (size_type i = size_; i > pos; --i) {
-            allocator_traits::construct(allocator_, data_ + i, data_[i-1]);
+        for (size_type i = size_ - 1; i > pos; --i) {
+            allocator_traits::construct(allocator_, data_ + i, data_[i - 1]);
+            allocator_traits::destroy(allocator_, data_ + i);
         }
         allocator_traits::construct(allocator_, data_ + pos, val);
 
-        return iterator(data_ + pos);
+        return iterator(&data_[pos]);
     }
-
-    return iterator(data_ + size_);
+    else {
+        return iterator(data_ + size_);
+    }
 }
 
 template <Keyable K, class V, size_t D>
@@ -265,19 +275,33 @@ template <Keyable K, class V, size_t D>
 inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const std::initializer_list<value_type> il, const size_type pos) {
     bool success = true;
 
-    if ((size_ + il.size()) > capacity_)
+    if ((size_ + il.size()) > capacity_) {
         success = reserve(size_ + il.size());
+    }
 
-    for (size_type )
-
-    return iterator(data_ + size_);
+    if (success) {
+        size_ = size_ + il.size();
+        for (size_type i = size_; i > pos; --i) {
+            allocator_traits::construct(allocator_, data_ + i, data_[i - il.size()]);
+        }
+        
+        for (size_type i = 0; i < il.size(); i++) {
+            allocator_traits::construct(allocator_, data_ + pos + i, *(il.begin() + i));
+        }
+        return iterator(data_ + pos);
+    }
+    else {
+        return iterator(data_ + size_);
+    }
 }
 
 template <Keyable K, class V, size_t D>
 inline auto unsorted_map<K, V, D>::at(const key_type key) {
-    for (size_type i = 0; i < size_; i++)
-        if (data_[i].first == key)
+    for (size_type i = 0; i < size_; i++) {
+        if (data_[i].first == key) {
             return std::make_pair<>(iterator(&data_[i]), i);
+        }
+    }
 
     return std::make_pair<>(iterator(data_ + size_), npos);
 }
@@ -325,13 +349,14 @@ inline bool unsorted_map<K, V, D>::resize(size_type new_capacity) {
         allocator_traits::construct(allocator_, new_data + i, std::move(data_[i]));
         allocator_traits::destroy(allocator_, data_ + i);
     }
-
+    
     if (size_ != 0) {
         allocator_traits::deallocate(allocator_, data_, capacity_);
     }
 
     data_ = new_data;
     capacity_ = new_capacity;
+
     return true;
 }
 

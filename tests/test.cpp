@@ -19,7 +19,7 @@ int main() {
 
     std::cout << "* Destructors:" << std::endl;    
     std::cout << "  Default destructor: ";
-    m.~unsorted_map();
+    m.clear();
     std::cout << "Object 'm' destroyed" << std::endl;
     std::cout << std::endl;
 
@@ -28,29 +28,73 @@ int main() {
     umap::iterator it = n.push_back(std::make_pair<std::string, size_t>("Cuatro", 4));
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+
+    std::cout << std::endl;
+    for (umap::iterator it = n.begin(); it != n.end(); it++) {
+        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    }
+    std::cout << std::endl;
+
     std::cout << "  push_back(string, int) -> ";
     it = n.push_back("Cinco", 5);
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    
+    std::cout << std::endl;
+    for (umap::iterator it = n.begin(); it != n.end(); it++) {
+        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    }
+    std::cout << std::endl;
+
     std::cout << "  push_back(unsorted_map) -> ";
-    m.reserve(10);
     m.push_back({{"Seis", 6}, {"Siete", 7}});
     it = n.push_back(m);
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+
+    std::cout << std::endl;
+    for (umap::iterator it = n.begin(); it != n.end(); it++) {
+        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    }
+    std::cout << std::endl;
+
     std::cout << "  insert(pair, pos) -> ";
     it = n.insert(std::make_pair("Ocho", 8), 6);
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+
+    std::cout << std::endl;
+    for (umap::iterator it = n.begin(); it != n.end(); it++) {
+        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    }
+    std::cout << std::endl;
+
     std::cout << "  insert(string, int, pos) -> ";
     it = n.insert("Nueve", 9, 6);
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
 
     std::cout << std::endl;
-    for (auto elem : n) {
-        auto at = elem;
-        std::cout << "Addr: " << &elem << " / (\"" << elem.first << "\" , " << elem.second << ") ";
+    for (umap::iterator it = n.begin(); it != n.end(); it++) {
+        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
         std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
     }
+    std::cout << std::endl;
+
+    std::cout << "  insert(initialization_list, pos) -> ";
+    it = n.insert({{"Diez", 10}, {"Once", 11}, {"Doce", 12}}, 6);
+    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+
+    std::cout << std::endl;
+    for (umap::iterator it = n.begin(); it != n.end(); it++) {
+        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    }
+    std::cout << std::endl;
+
 }
