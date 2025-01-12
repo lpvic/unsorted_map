@@ -98,18 +98,22 @@ class unsorted_map
         iterator push_back(const key_type& key, const mapped_type& val) { return insert(key, val, size_); }
         iterator push_back(const std::initializer_list<value_type>& il) { return insert(il, size_); }
         iterator push_back(const unsorted_map<key_type, mapped_type, D>& map) { return insert(map, size_); }
+        iterator push_front(const value_type& val) { return insert(val, 0); }
+        iterator push_front(const key_type& key, const mapped_type& val) { return insert(key, val, 0); }
+        iterator push_front(const std::initializer_list<value_type>& il) { return insert(il, 0); }
+        iterator push_front(const unsorted_map<key_type, mapped_type, D>& map) { return insert(map, 0); }
 
         // Element access
         iterator at(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : iterator(data_ + size_); }
-        auto at(const key_type key);  // return type : std::pair<iterator, size_type>
-        auto all(const key_type key);  // return type : std::vector<std::pair<iterator, size_type>>
+        auto at(const key_type& key);  // return type : std::pair<iterator, size_type>
+        auto all(const key_type& key);  // return type : std::vector<std::pair<iterator, size_type>>
         pointer data() { return data_; }
 
         // Element management
         void clear();
         void erase(const size_type pos);
-        void erase(const key_type key);
-        void erase_all(const key_type key);
+        void erase(const key_type& key);
+        void erase_all(const key_type& key);
         void swap(const size_type from, const size_type to);
         unsorted_map<key_type, mapped_type, D> copy();
         unsorted_map<key_type, mapped_type, D> move();
@@ -239,7 +243,7 @@ unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const unsorted_map
 }
 
 template <Keyable K, class V, size_t D>
-inline auto unsorted_map<K, V, D>::at(const key_type key) {
+inline auto unsorted_map<K, V, D>::at(const key_type& key) {
     for (size_type i = 0; i < size_; i++) {
         if (data_[i].first == key) {
             return std::make_pair<>(iterator(&data_[i]), i);
@@ -250,7 +254,7 @@ inline auto unsorted_map<K, V, D>::at(const key_type key) {
 }
 
 template <Keyable K, class V, size_t D>
-inline auto unsorted_map<K, V, D>::all(const key_type key) {
+inline auto unsorted_map<K, V, D>::all(const key_type& key) {
     std::vector<std::pair<iterator, size_type>> out;
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key) {
@@ -318,7 +322,7 @@ bool unsorted_map<K, V, D>::gap_(size_type from, size_type length)
         }
         else {
             for (size_type i = size_ - 1; i > from; i--) {
-                allocator_traits::construct(allocator_, data_ + i, data_[i - length]);
+                allocator_traits::construct(allocator_, data_ + i, std::move(data_[i - length]));
                 allocator_traits::destroy(allocator_, data_ + i - length);
             }
             return true;

@@ -74,4 +74,26 @@ int main() {
     it = n.insert(m, 6);
     std::cout << "n.insert(m, 6);" << std::endl;
     print(n);
+
+    std::cout << "  push_front(pair) -> ";
+    it = n.push_front("Trece", 13);
+    std::cout << "n.push_front(\"Trece\", 13);" << std::endl;
+    print(n);
+
+    std::cout << "  push_front(string, int) -> ";
+    it = n.push_front("Catorce", 14);
+    std::cout << "n.push_front(\"Catorce\", 14);" << std::endl;
+    print(n);
+
+    std::cout << "  push_front(initialization_list) -> ";
+    n.push_front({{"Quince", 15}, {"Dieciseis", 16}});
+    std::cout << "n.push_front({{\"Quince\", 15}, {\"Dieciseis\", 16}});" << std::endl;
+    print(n);
+
+    std::cout << "  push_front(unsorted_map) -> ";
+    it = n.push_front(m);
+    std::cout << "n.push_front(m);" << std::endl;
+    print(n);
+
+    //print(m);
 }
