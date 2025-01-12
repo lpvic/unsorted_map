@@ -90,6 +90,17 @@ int main() {
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
 
+    std::cout << "  insert(unsorted_map, pos) -> ";
+    it = n.insert(m, 6);
+    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+
+    n.push_back("Cinco", 5);
+    n.push_back("Cinco", 5);
+    n.push_back("Cinco", 5);
+    n.push_back("Cinco", 5);
+    n.push_back("Cinco", 5);
+
     std::cout << std::endl;
     for (umap::iterator it = n.begin(); it != n.end(); it++) {
         std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
