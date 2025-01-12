@@ -5,10 +5,11 @@
 using  umap = unsorted_map<std::string, size_t, 3>;
 
 void print(umap& map) {
-    // std::cout << std::endl;
+    umap::size_type i = 0;
     for (umap::iterator it = map.begin(); it != map.end(); it++) {
-        std::cout << "    Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+        std::cout << "    Addr: " << &(*it) << " / " << "pos " << i << ": (\"" << it->first << "\" , " << it->second << ") ";
         std::cout << "-> size = " << map.size() << ", capacity = " << map.capacity() << std::endl;
+        i++;
     }
     std::cout << std::endl;
 }
@@ -54,41 +55,50 @@ int main() {
     std::cout << "n.push_back(m);" << std::endl;
     print(n);
 
-/*    std::cout << "  insert(pair, pos) -> ";
+    std::cout << "  insert(pair, pos) -> ";
     it = n.insert(std::make_pair("Ocho", 8), 6);
-    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    std::cout << "n.insert(std::make_pair(\"Ocho\", 8), 6);" << std::endl;
     print(n);
-*/
 
-/*    std::cout << "  insert(string, int, pos) -> ";
+
+    std::cout << "  insert(string, int, pos) -> ";
     it = n.insert("Nueve", 9, 6);
-    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-
-    std::cout << std::endl;
-    for (umap::iterator it = n.begin(); it != n.end(); it++) {
-        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-    }
-    std::cout << std::endl;
+    std::cout << "n.insert(\"Nueve\", 9, 6);" << std::endl;
+    print(n);
 
     std::cout << "  insert(initialization_list, pos) -> ";
     it = n.insert({{"Diez", 10}, {"Once", 11}, {"Doce", 12}}, 6);
-    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    std::cout << "n.insert({{\"Diez\", 10}, {\"Once\", 11}, {\"Doce\", 12}}, 6);" << std::endl;
+    print(n);
 
     std::cout << "  insert(unsorted_map, pos) -> ";
     it = n.insert(m, 6);
-    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-*/
+    std::cout << "n.insert(m, 6);" << std::endl;
+    print(n);
+
+/*
+    n.push_back("Extra 1", 101);
+    n.push_back("Extra 2", 101);
+    n.push_back("Extra 3", 101);
+    n.push_back("Extra 4", 101);
+    n.push_back("Extra 5", 101);
     n.push_back("Extra 1", 101);
     n.push_back("Extra 2", 101);
     n.push_back("Extra 3", 101);
     n.push_back("Extra 4", 101);
     n.push_back("Extra 5", 101);
 
-
-
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    n.insert("Insert 1", 201, n.size());
+    print(n);
+*/
 }
