@@ -1,10 +1,19 @@
-#include "../include/unsorted_map.hpp"
+#include "unsorted_map.hpp"
 
 #include <string>
 
-int main() {
-    using  umap = unsorted_map<std::string, size_t, 3>;
+using  umap = unsorted_map<std::string, size_t, 3>;
 
+void print(umap& map) {
+    // std::cout << std::endl;
+    for (umap::iterator it = map.begin(); it != map.end(); it++) {
+        std::cout << "    Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
+        std::cout << "-> size = " << map.size() << ", capacity = " << map.capacity() << std::endl;
+    }
+    std::cout << std::endl;
+}
+
+int main() {
     std::cout << "Testing unsorted_map" << std::endl;
     std::cout << "====================" << std::endl;
 
@@ -13,67 +22,46 @@ int main() {
     umap m;
     std::cout << "Object 'm' created -> size = " << m.size() << ", capacity = " << m.capacity() << std::endl;
     std::cout << "  Constructor from initialization list: ";
-    umap n = {{"Uno", 1}, {"Dos", 2}, {"Tres", 3}};
-    std::cout << "Object 'n' created -> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-    std::cout << std::endl;
+    umap n = {{"Cero", 0}, {"Uno", 1}, {"Dos", 2}, {"Tres", 3}};
+    std::cout << R"(umap n = {{"Cero", 0}, {"Uno", 1}, {"Dos", 2}, {"Tres", 3}};)" << std::endl;
+    print(n);
 
-    std::cout << "* Destructors:" << std::endl;    
+/*    std::cout << "* Destructors:" << std::endl;    
     std::cout << "  Default destructor: ";
     m.clear();
     std::cout << "Object 'm' destroyed" << std::endl;
     std::cout << std::endl;
+*/
 
     std::cout << "* Inserting elements:" << std::endl;
     std::cout << "  push_back(pair) -> ";
     umap::iterator it = n.push_back(std::make_pair<std::string, size_t>("Cuatro", 4));
-    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-
-    std::cout << std::endl;
-    for (umap::iterator it = n.begin(); it != n.end(); it++) {
-        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-    }
-    std::cout << std::endl;
+    std::cout << "n.push_back(std::make_pair<std::string, size_t>(\"Cuatro\", 4));" << std::endl;
+    print(n);
 
     std::cout << "  push_back(string, int) -> ";
     it = n.push_back("Cinco", 5);
-    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-    
-    std::cout << std::endl;
-    for (umap::iterator it = n.begin(); it != n.end(); it++) {
-        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-    }
-    std::cout << std::endl;
+    std::cout << "n.push_back(\"Cinco\", 5);" << std::endl;
+    print(n);
+
+    std::cout << "  push_back(initialization_list) -> ";
+    m.push_back({{"Seis", 6}, {"Siete", 7}});
+    std::cout << "m.push_back({{\"Seis\", 6}, {\"Siete\", 7}});" << std::endl;
+    print(m);
 
     std::cout << "  push_back(unsorted_map) -> ";
-    m.push_back({{"Seis", 6}, {"Siete", 7}});
     it = n.push_back(m);
-    std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-    std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    std::cout << "n.push_back(m);" << std::endl;
+    print(n);
 
-    std::cout << std::endl;
-    for (umap::iterator it = n.begin(); it != n.end(); it++) {
-        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-    }
-    std::cout << std::endl;
-
-    std::cout << "  insert(pair, pos) -> ";
+/*    std::cout << "  insert(pair, pos) -> ";
     it = n.insert(std::make_pair("Ocho", 8), 6);
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+    print(n);
+*/
 
-    std::cout << std::endl;
-    for (umap::iterator it = n.begin(); it != n.end(); it++) {
-        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-    }
-    std::cout << std::endl;
-
-    std::cout << "  insert(string, int, pos) -> ";
+/*    std::cout << "  insert(string, int, pos) -> ";
     it = n.insert("Nueve", 9, 6);
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
@@ -94,18 +82,13 @@ int main() {
     it = n.insert(m, 6);
     std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
     std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
+*/
+    n.push_back("Extra 1", 101);
+    n.push_back("Extra 2", 101);
+    n.push_back("Extra 3", 101);
+    n.push_back("Extra 4", 101);
+    n.push_back("Extra 5", 101);
 
-    n.push_back("Cinco", 5);
-    n.push_back("Cinco", 5);
-    n.push_back("Cinco", 5);
-    n.push_back("Cinco", 5);
-    n.push_back("Cinco", 5);
 
-    std::cout << std::endl;
-    for (umap::iterator it = n.begin(); it != n.end(); it++) {
-        std::cout << "Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-        std::cout << "-> size = " << n.size() << ", capacity = " << n.capacity() << std::endl;
-    }
-    std::cout << std::endl;
 
 }

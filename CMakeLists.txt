@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include_directories(include)
 add_executable(test ./tests/test.cpp)
 add_executable(allocators ./tests/test_allocators.cpp)
 add_executable(for ./tests/for.cpp)
