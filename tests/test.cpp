@@ -60,7 +60,6 @@ int main() {
     std::cout << "n.insert(std::make_pair(\"Ocho\", 8), 6);" << std::endl;
     print(n);
 
-
     std::cout << "  insert(string, int, pos) -> ";
     it = n.insert("Nueve", 9, 6);
     std::cout << "n.insert(\"Nueve\", 9, 6);" << std::endl;
@@ -75,30 +74,4 @@ int main() {
     it = n.insert(m, 6);
     std::cout << "n.insert(m, 6);" << std::endl;
     print(n);
-
-/*
-    n.push_back("Extra 1", 101);
-    n.push_back("Extra 2", 101);
-    n.push_back("Extra 3", 101);
-    n.push_back("Extra 4", 101);
-    n.push_back("Extra 5", 101);
-    n.push_back("Extra 1", 101);
-    n.push_back("Extra 2", 101);
-    n.push_back("Extra 3", 101);
-    n.push_back("Extra 4", 101);
-    n.push_back("Extra 5", 101);
-
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    n.insert("Insert 1", 201, n.size());
-    print(n);
-*/
 }
