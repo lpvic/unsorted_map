@@ -100,17 +100,19 @@ class unsorted_map
         iterator insert(const unsorted_map<key_type, mapped_type, D> map, const size_type pos);
 
         // Element access
-        iterator at(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : throw std::out_of_range("Out of range"); }
+        iterator at(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : iterator(data_ + size_); }
         auto at(const key_type key);  // return type : std::pair<iterator, size_type>
         auto all(const key_type key);  // return type : std::vector<std::pair<iterator, size_type>>
         pointer data() { return data_; }
-        iterator operator[](const size_type pos) { at(pos); }
-        auto operator[](const key_type key) { at(key); }
+        // iterator operator[](const size_type pos) { at(pos); }
+        // auto operator[](const key_type key) { at(key); }
 
         // Element management
         void clear();
-        void erase(key_type key);
-        void swap(size_type from, size_type to);
+        void erase(const size_type pos);
+        void erase(const key_type key);
+        void erase_all(const key_type key);
+        void swap(const size_type from, const size_type to);
         unsorted_map<key_type, mapped_type, D> copy();
         unsorted_map<key_type, mapped_type, D> move();
         
@@ -147,6 +149,8 @@ class unsorted_map
         size_type size_;
         size_type capacity_;
         pointer data_;
+
+        bool gap_(size_type from, size_type length);
 };
 
 template <Keyable K, class V, size_t D>
@@ -243,25 +247,33 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const un
 }
 
 template <Keyable K, class V, size_t D> 
-inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &val, const size_type pos) {
+unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &val, const size_type pos) {
     bool success = true;
 
-    if (size_ == capacity_) {
-        success = reserve(size_ + 1);
+    if (pos > size_) {
+        return iterator(data_ + size_);
     }
-
-    if (success) {
-        size_++;
-        for (size_type i = size_ - 1; i > pos; --i) {
-            allocator_traits::construct(allocator_, data_ + i, data_[i - 1]);
-            allocator_traits::destroy(allocator_, data_ + i);
-        }
-        allocator_traits::construct(allocator_, data_ + pos, val);
-
-        return iterator(&data_[pos]);
+    else if (pos == size_) {
+        return push_back(val);
     }
     else {
-        return iterator(data_ + size_);
+        if (size_ == capacity_) {
+            success = reserve(size_ + 1);
+        }
+
+        if (success) {
+            size_++;
+            for (size_type i = size_ - 1; i > pos; --i) {
+                allocator_traits::construct(allocator_, data_ + i, data_[i - 1]);
+                allocator_traits::destroy(allocator_, data_ + i);
+            }
+            allocator_traits::construct(allocator_, data_ + pos, val);
+
+            return iterator(&data_[pos]);
+        }
+        else {
+            return iterator(data_ + size_);
+        }
     }
 }
 
@@ -274,6 +286,10 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const key_t
 template <Keyable K, class V, size_t D>
 inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const std::initializer_list<value_type> il, const size_type pos) {
     bool success = true;
+
+    if (pos >= size_) {
+        return iterator(data_ + size_);
+    }
 
     if ((size_ + il.size()) > capacity_) {
         success = reserve(size_ + il.size());
@@ -298,6 +314,10 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const std::
 template <Keyable K, class V, size_t D>
 inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const unsorted_map<key_type, mapped_type, D> map, const size_type pos) {
     bool success = true;
+
+    if (pos >= size_) {
+        return iterator(data_ + size_);
+    }
 
     if ((size_ + map.size_) > capacity_) {
         success = reserve(size_ + map.size_);
@@ -382,6 +402,34 @@ inline bool unsorted_map<K, V, D>::resize(size_type new_capacity) {
     capacity_ = new_capacity;
 
     return true;
+}
+
+template <Keyable K, class V, size_t D>
+inline bool unsorted_map<K, V, D>::gap_(size_type from, size_type length)
+{
+    bool success = true;
+
+    if ((size_ + length) > capacity_) {
+        success = reserve(size_ + length);
+    }
+
+    if (success) {
+        if (from >= size_){
+            return true;
+        }
+        else {
+            size_ = size_ + length;
+            for (size_type i = size_; i > from; --i) {
+                allocator_traits::construct(allocator_, data_ + i, data_[i - length]);
+                allocator_traits::destroy(allocator_, data_ + i - length);
+            }
+
+            return true;
+        }
+    }
+    else {
+        return false;
+    }
 }
 
 #endif
