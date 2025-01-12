@@ -197,7 +197,7 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const va
         return iterator(&data_[size_++]);
     }
     else {
-        return iterator(data_ + size_);
+        return end();
     }
 }
 
@@ -222,7 +222,7 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const st
         return iterator(&data_[size_ - il.size()]);
     }    
     else {
-        return iterator(data_ + size_);
+        return end();
     }
 }
 
@@ -242,7 +242,7 @@ inline unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::push_back(const un
         return iterator(&data_[size_ - map.size_]);
     }
     else {
-        return iterator(data_ + size_);
+        return end();
     }
 }
 
@@ -251,7 +251,7 @@ unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &
     bool success = true;
 
     if (pos > size_) {
-        return iterator(data_ + size_);
+        return iterator(end());
     }
     else if (pos == size_) {
         return push_back(val);
@@ -263,7 +263,7 @@ unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &
 
         if (success) {
             size_++;
-            for (size_type i = size_ - 1; i > pos; --i) {
+            for (size_type i = size_ - 1; i > pos; i--) {
                 allocator_traits::construct(allocator_, data_ + i, data_[i - 1]);
                 allocator_traits::destroy(allocator_, data_ + i);
             }
@@ -272,7 +272,7 @@ unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &
             return iterator(&data_[pos]);
         }
         else {
-            return iterator(data_ + size_);
+            return end();
         }
     }
 }
@@ -419,11 +419,10 @@ inline bool unsorted_map<K, V, D>::gap_(size_type from, size_type length)
         }
         else {
             size_ = size_ + length;
-            for (size_type i = size_; i > from; --i) {
+            for (size_type i = size_ - 1; i > from; i--) {
                 allocator_traits::construct(allocator_, data_ + i, data_[i - length]);
                 allocator_traits::destroy(allocator_, data_ + i - length);
             }
-
             return true;
         }
     }

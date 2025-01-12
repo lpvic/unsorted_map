@@ -7,3 +7,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(test ./tests/test.cpp)
 add_executable(allocators ./tests/test_allocators.cpp)
+add_executable(for ./tests/for.cpp)
