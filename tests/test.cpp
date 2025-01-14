@@ -94,6 +94,4 @@ int main() {
     it = n.push_front(m);
     std::cout << "n.push_front(m);" << std::endl;
     print(n);
-
-    //print(m);
 }

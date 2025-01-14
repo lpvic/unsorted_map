@@ -104,17 +104,18 @@ class unsorted_map
         iterator push_front(const unsorted_map<key_type, mapped_type, D>& map) { return insert(map, 0); }
 
         // Element access
-        iterator at(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : iterator(data_ + size_); }
+        iterator at(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : end(); }
         auto at(const key_type& key);  // return type : std::pair<iterator, size_type>
         auto all(const key_type& key);  // return type : std::vector<std::pair<iterator, size_type>>
         pointer data() { return data_; }
 
         // Element management
         void clear();
-        void erase(const size_type pos);
-        void erase(const key_type& key);
-        void erase_all(const key_type& key);
-        void swap(const size_type from, const size_type to);
+        bool erase(const size_type pos);
+        bool erase(const key_type& key);
+        bool erase();
+        bool erase_all(const key_type& key);
+        bool swap(const size_type from, const size_type to);
         unsorted_map<key_type, mapped_type, D> copy();
         unsorted_map<key_type, mapped_type, D> move();
         
@@ -249,8 +250,7 @@ inline auto unsorted_map<K, V, D>::at(const key_type& key) {
             return std::make_pair<>(iterator(&data_[i]), i);
         }
     }
-
-    return std::make_pair<>(iterator(data_ + size_), npos);
+    return std::make_pair<>(end(), npos);
 }
 
 template <Keyable K, class V, size_t D>
@@ -270,6 +270,12 @@ inline void unsorted_map<K, V, D>::clear() {
     for (size_type i = 0; i < size_; i++)
         allocator_traits::destroy(allocator_, data_ + i);
     size_ = 0;
+}
+
+template <Keyable K, class V, size_t D>
+inline bool unsorted_map<K, V, D>::erase(const size_type pos) {
+    // TODO
+    return false;
 }
 
 template <Keyable K, class V, size_t D>
@@ -321,7 +327,7 @@ bool unsorted_map<K, V, D>::gap_(size_type from, size_type length)
             return true;
         }
         else {
-            for (size_type i = size_ - 1; i > from; i--) {
+            for (size_type i = size_ - 1; ((i > from) && ((i - length) != npos)); i--) {
                 allocator_traits::construct(allocator_, data_ + i, std::move(data_[i - length]));
                 allocator_traits::destroy(allocator_, data_ + i - length);
             }
