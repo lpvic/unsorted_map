@@ -87,6 +87,8 @@ class unsorted_map
         // Constructors and destructors
         unsorted_map() : capacity_(D), size_(0), data_(allocator_traits::allocate(allocator_, capacity_)) {};
         unsorted_map(const std::initializer_list<value_type>& il);
+        unsorted_map(const unsorted_map& other);
+        unsorted_map(const unsorted_map&& other);
         ~unsorted_map();
 
         // Element addition
@@ -115,8 +117,6 @@ class unsorted_map
         void erase(const key_type& key) { erase(at(key).second);  }
         void erase_all(const key_type& key);
         void swap(const size_type from, const size_type to);
-        unsorted_map<key_type, mapped_type, D> copy();
-        unsorted_map<key_type, mapped_type, D> move();
         
         // Memory related members
         size_type size() { return size_; }
@@ -125,6 +125,10 @@ class unsorted_map
         bool reserve(size_type min_capacity);
         bool shrink() { return resize(size_); };
         bool resize(size_type new_capacity);
+
+        // Operators
+        unsorted_map& operator=(unsorted_map& other);
+        unsorted_map& operator=(unsorted_map&& other);
 
         // Iterators
         iterator begin() { return iterator(data_); }
