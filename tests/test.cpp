@@ -94,4 +94,32 @@ int main() {
     it = n.push_front(m);
     std::cout << "n.push_front(m);" << std::endl;
     print(n);
+
+    std::cout << "  all(key) -> ";
+    auto v = n.all("Seis");
+    std::cout << "n.all(\"Seis\");" << std::endl;
+    for (auto e : v) {
+        std::cout << "    (" << e.first->first << " , " << e.first->second << ") " << e.second << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::cout << "  erase(pos) -> ";
+    n.erase(7);
+    std::cout << "n.erase(7);" << std::endl;
+    print(n);
+
+    std::cout << "  erase(key) -> ";
+    n.erase("Dos");
+    std::cout << "n.erase(\"Dos\");" << std::endl;
+    print(n);
+
+    std::cout << "  erase_all(key) -> ";
+    n.erase_all("Seis");
+    std::cout << "n.erase_all(\"Seis\");" << std::endl;
+    print(n);
+
+    std::cout << "  swap(from, to) -> ";
+    n.swap(8, 10);
+    std::cout << "n.swap(8, 10);" << std::endl;
+    print(n);
 }

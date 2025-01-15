@@ -111,11 +111,10 @@ class unsorted_map
 
         // Element management
         void clear();
-        bool erase(const size_type pos);
-        bool erase(const key_type& key);
-        bool erase();
-        bool erase_all(const key_type& key);
-        bool swap(const size_type from, const size_type to);
+        void erase(const size_type pos);
+        void erase(const key_type& key) { erase(at(key).second);  }
+        void erase_all(const key_type& key);
+        void swap(const size_type from, const size_type to);
         unsorted_map<key_type, mapped_type, D> copy();
         unsorted_map<key_type, mapped_type, D> move();
         
@@ -244,7 +243,7 @@ unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const unsorted_map
 }
 
 template <Keyable K, class V, size_t D>
-inline auto unsorted_map<K, V, D>::at(const key_type& key) {
+auto unsorted_map<K, V, D>::at(const key_type& key) {
     for (size_type i = 0; i < size_; i++) {
         if (data_[i].first == key) {
             return std::make_pair<>(iterator(&data_[i]), i);
@@ -254,7 +253,7 @@ inline auto unsorted_map<K, V, D>::at(const key_type& key) {
 }
 
 template <Keyable K, class V, size_t D>
-inline auto unsorted_map<K, V, D>::all(const key_type& key) {
+auto unsorted_map<K, V, D>::all(const key_type& key) {
     std::vector<std::pair<iterator, size_type>> out;
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key) {
@@ -266,16 +265,40 @@ inline auto unsorted_map<K, V, D>::all(const key_type& key) {
 }
 
 template <Keyable K, class V, size_t D>
-inline void unsorted_map<K, V, D>::clear() {
+void unsorted_map<K, V, D>::clear() {
     for (size_type i = 0; i < size_; i++)
         allocator_traits::destroy(allocator_, data_ + i);
     size_ = 0;
 }
 
 template <Keyable K, class V, size_t D>
-inline bool unsorted_map<K, V, D>::erase(const size_type pos) {
-    // TODO
-    return false;
+void unsorted_map<K, V, D>::erase(const size_type pos) {
+    
+    --size_;
+    for (size_type i = pos; i < size_; ++i) {
+        allocator_traits::destroy(allocator_, data_ + i);
+        allocator_traits::construct(allocator_, data_ + i, std::move(data_[i + 1]));
+    }
+}
+
+template <Keyable K, class V, size_t D>
+void unsorted_map<K, V, D>::erase_all(const key_type &key)
+{
+    auto v = all(key);
+    for (auto it = v.rbegin(); it != v.rend(); ++it) {
+        erase(it->second);
+    }
+}
+
+template <Keyable K, class V, size_t D>
+inline void unsorted_map<K, V, D>::swap(const size_type from, const size_type to)
+{
+    value_type temp_ = data_[to];
+
+    allocator_traits::destroy(allocator_, data_ + to);
+    allocator_traits::construct(allocator_, data_ + to, std::move(data_[from]));
+    allocator_traits::destroy(allocator_, data_ + from);
+    allocator_traits::construct(allocator_, data_ + from, temp_);
 }
 
 template <Keyable K, class V, size_t D>
