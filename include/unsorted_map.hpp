@@ -11,17 +11,17 @@
 #include <ranges>
 
 template<class T>
-concept Keyable = (requires(T a, T b) {a == b;}) && (!std::is_integral<T>::value);
+concept Keyable = (requires(T a_, T b_) {a_ == b_;}) && (!std::is_integral<T>::value);
 
-template<Keyable K, class V, size_t D = 100>
+template<Keyable key_, class value_, size_t delta_ = 100>
 class unsorted_map
 {
     public:
         class Iterator;
         class ConstIterator;
 
-        using key_type = K;
-        using mapped_type = V;
+        using key_type = key_;
+        using mapped_type = value_;
         using value_type = std::pair<const key_type, mapped_type>;
         using allocator_type = std::allocator<value_type>;
         using allocator_traits = std::allocator_traits<allocator_type>;
@@ -81,29 +81,29 @@ class unsorted_map
                 bool operator!=(const ConstIterator& other) const = default;
 
             private:
-                pointer ptr_;
+                pointer ptr_ = nullptr;
         };        
         
         // Constructors and destructors
-        unsorted_map() : capacity_(D), size_(0), data_(allocator_traits::allocate(allocator_, capacity_)) {};
+        unsorted_map() : capacity_(0), size_(0), data_(nullptr) {};
         unsorted_map(const std::initializer_list<value_type>& il);
         unsorted_map(const unsorted_map& other);
-        unsorted_map(const unsorted_map&& other);
+        unsorted_map(unsorted_map&& other) noexcept(allocator_traits::is_always_equal::value);
         ~unsorted_map();
 
         // Element addition
         iterator insert(const value_type& val, const size_type pos);
         iterator insert(const key_type& key, const mapped_type& val, const size_type pos) { return insert(std::make_pair<>(key, val), pos); }
         iterator insert(const std::initializer_list<value_type>& il, const size_type pos);
-        iterator insert(const unsorted_map<key_type, mapped_type, D>& map, const size_type pos);
+        iterator insert(const unsorted_map<key_type, mapped_type, delta_>& map, const size_type pos);
         iterator push_back(const value_type& val) { return insert(val, size_); }
         iterator push_back(const key_type& key, const mapped_type& val) { return insert(key, val, size_); }
         iterator push_back(const std::initializer_list<value_type>& il) { return insert(il, size_); }
-        iterator push_back(const unsorted_map<key_type, mapped_type, D>& map) { return insert(map, size_); }
+        iterator push_back(const unsorted_map<key_type, mapped_type, delta_>& map) { return insert(map, size_); }
         iterator push_front(const value_type& val) { return insert(val, 0); }
         iterator push_front(const key_type& key, const mapped_type& val) { return insert(key, val, 0); }
         iterator push_front(const std::initializer_list<value_type>& il) { return insert(il, 0); }
-        iterator push_front(const unsorted_map<key_type, mapped_type, D>& map) { return insert(map, 0); }
+        iterator push_front(const unsorted_map<key_type, mapped_type, delta_>& map) { return insert(map, 0); }
 
         // Element access
         iterator at(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : end(); }
@@ -121,13 +121,14 @@ class unsorted_map
         // Memory related members
         size_type size() { return size_; }
         size_type capacity() { return capacity_; }
-        allocator_type get_allocator() { return allocator_; }
+        bool is_empty() { return ((data_ == nullptr) || (size_ == 0)); }
+        // allocator_type get_allocator() { return allocator_; }
         bool reserve(size_type min_capacity);
         bool shrink() { return resize(size_); };
         bool resize(size_type new_capacity);
 
         // Operators
-        unsorted_map& operator=(unsorted_map& other);
+        unsorted_map& operator=(const unsorted_map& other);
         unsorted_map& operator=(unsorted_map&& other);
 
         // Iterators
@@ -154,20 +155,17 @@ class unsorted_map
 
     private:
         allocator_type allocator_;
-        size_type size_;
-        size_type capacity_;
-        pointer data_;
+        size_type size_ = 0;
+        size_type capacity_ = 0;
+        pointer data_ = nullptr;
 
         
 };
 
-template <Keyable K, class V, size_t D>
-unsorted_map<K, V, D>::unsorted_map(const std::initializer_list<value_type>& il) {
-    capacity_ = D;
-    size_ = 0;
-
+template <Keyable key_, class value_, size_t delta_>
+unsorted_map<key_, value_, delta_>::unsorted_map(const std::initializer_list<value_type>& il) : capacity_(delta_), size_(0) {
     if (capacity_ < il.size()) {
-        capacity_ = ((il.size() / D) + 1) * D;
+        capacity_ = ((il.size() / delta_) + 1) * delta_;
     }
 
     data_ = allocator_traits::allocate(allocator_, capacity_);
@@ -180,8 +178,31 @@ unsorted_map<K, V, D>::unsorted_map(const std::initializer_list<value_type>& il)
     }
 }
 
-template <Keyable K, class V, size_t D>
-unsorted_map<K, V, D>::~unsorted_map() {
+template <Keyable key_, class value_, size_t delta_>
+unsorted_map<key_, value_, delta_>::unsorted_map(const unsorted_map &other) : capacity_(other.capacity_), size_(other.size_) {
+    data_ = allocator_traits::allocate(allocator_, capacity_);
+
+    for (size_type i = 0; i < size_; ++i) {
+        allocator_traits::construct(allocator_, data_ + i, std::make_pair(other.data_[i].first, other.data_[i].second));
+    }
+}
+
+template <Keyable key_, class value_, size_t delta_>
+unsorted_map<key_, value_, delta_>::unsorted_map(unsorted_map &&other) noexcept(allocator_traits::is_always_equal::value) {
+    if (allocator_traits::propagate_on_container_move_assignment::value) {
+        allocator_ = std::move(other.allocator_);
+    }
+    else {
+        allocator_ = other.allocator_;
+    }
+
+    data_ = std::exchange(other.data_, nullptr);
+    size_ = std::exchange(other.size_, 0);
+    capacity_ = std::exchange(other.capacity_, 0);
+}
+
+template <Keyable key_, class value_, size_t delta_>
+unsorted_map<key_, value_, delta_>::~unsorted_map() {
     for (size_type i = 0; i < size_; i++) {
         allocator_traits::destroy(allocator_, data_ + i);
     }
@@ -189,8 +210,8 @@ unsorted_map<K, V, D>::~unsorted_map() {
     allocator_traits::deallocate(allocator_, data_, capacity_);
 }
 
-template <Keyable K, class V, size_t D> 
-unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &val, const size_type pos) {
+template <Keyable key_, class value_, size_t delta_> 
+unsorted_map<key_, value_, delta_>::iterator unsorted_map<key_, value_, delta_>::insert(const value_type &val, const size_type pos) {
     if (pos > size_) {
         return end();
     }
@@ -207,8 +228,8 @@ unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const value_type &
     }
 }
 
-template <Keyable K, class V, size_t D>
-unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const std::initializer_list<value_type>& il, const size_type pos) {
+template <Keyable key_, class value_, size_t delta_>
+unsorted_map<key_, value_, delta_>::iterator unsorted_map<key_, value_, delta_>::insert(const std::initializer_list<value_type>& il, const size_type pos) {
     if (pos > size_) {
         return end();
     }
@@ -226,8 +247,8 @@ unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const std::initial
     }
 }
 
-template <Keyable K, class V, size_t D>
-unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const unsorted_map<key_type, mapped_type, D>& map, const size_type pos) {
+template <Keyable key_, class value_, size_t delta_>
+unsorted_map<key_, value_, delta_>::iterator unsorted_map<key_, value_, delta_>::insert(const unsorted_map<key_type, mapped_type, delta_>& map, const size_type pos) {
     if (pos > size_) {
         return end();
     }
@@ -246,8 +267,8 @@ unsorted_map<K, V, D>::iterator unsorted_map<K, V, D>::insert(const unsorted_map
     }
 }
 
-template <Keyable K, class V, size_t D>
-auto unsorted_map<K, V, D>::at(const key_type& key) {
+template <Keyable key_, class value_, size_t delta_>
+auto unsorted_map<key_, value_, delta_>::at(const key_type& key) {
     for (size_type i = 0; i < size_; i++) {
         if (data_[i].first == key) {
             return std::make_pair<>(iterator(&data_[i]), i);
@@ -256,8 +277,8 @@ auto unsorted_map<K, V, D>::at(const key_type& key) {
     return std::make_pair<>(end(), npos);
 }
 
-template <Keyable K, class V, size_t D>
-auto unsorted_map<K, V, D>::all(const key_type& key) {
+template <Keyable key_, class value_, size_t delta_>
+auto unsorted_map<key_, value_, delta_>::all(const key_type& key) {
     std::vector<std::pair<iterator, size_type>> out;
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key) {
@@ -268,25 +289,26 @@ auto unsorted_map<K, V, D>::all(const key_type& key) {
     return out;
 }
 
-template <Keyable K, class V, size_t D>
-void unsorted_map<K, V, D>::clear() {
+template <Keyable key_, class value_, size_t delta_>
+void unsorted_map<key_, value_, delta_>::clear() {
     for (size_type i = 0; i < size_; i++)
         allocator_traits::destroy(allocator_, data_ + i);
     size_ = 0;
 }
 
-template <Keyable K, class V, size_t D>
-void unsorted_map<K, V, D>::erase(const size_type pos) {
-    
-    --size_;
-    for (size_type i = pos; i < size_; ++i) {
-        allocator_traits::destroy(allocator_, data_ + i);
-        allocator_traits::construct(allocator_, data_ + i, std::move(data_[i + 1]));
+template <Keyable key_, class value_, size_t delta_>
+void unsorted_map<key_, value_, delta_>::erase(const size_type pos) {
+    if ((size_ > 0) && (pos < size_)) {
+        --size_;
+        for (size_type i = pos; i < size_; ++i) {
+            allocator_traits::destroy(allocator_, data_ + i);
+            allocator_traits::construct(allocator_, data_ + i, std::move(data_[i + 1]));
+        }
     }
 }
 
-template <Keyable K, class V, size_t D>
-void unsorted_map<K, V, D>::erase_all(const key_type &key)
+template <Keyable key_, class value_, size_t delta_>
+void unsorted_map<key_, value_, delta_>::erase_all(const key_type &key)
 {
     auto v = all(key);
     for (auto it = v.rbegin(); it != v.rend(); ++it) {
@@ -294,8 +316,8 @@ void unsorted_map<K, V, D>::erase_all(const key_type &key)
     }
 }
 
-template <Keyable K, class V, size_t D>
-inline void unsorted_map<K, V, D>::swap(const size_type from, const size_type to)
+template <Keyable key_, class value_, size_t delta_>
+inline void unsorted_map<key_, value_, delta_>::swap(const size_type from, const size_type to)
 {
     value_type temp_ = data_[to];
 
@@ -305,17 +327,17 @@ inline void unsorted_map<K, V, D>::swap(const size_type from, const size_type to
     allocator_traits::construct(allocator_, data_ + from, temp_);
 }
 
-template <Keyable K, class V, size_t D>
-inline bool unsorted_map<K, V, D>::reserve(size_type min_capacity) {
+template <Keyable key_, class value_, size_t delta_>
+inline bool unsorted_map<key_, value_, delta_>::reserve(size_type min_capacity) {
     if (min_capacity < size_)
         return false;
 
-    size_type new_capacity = ((min_capacity / D) + 1) * D;
+    size_type new_capacity = ((min_capacity / delta_) + 1) * delta_;
     return resize(new_capacity);
 }
 
-template <Keyable K, class V, size_t D>
-bool unsorted_map<K, V, D>::resize(size_type new_capacity) {
+template <Keyable key_, class value_, size_t delta_>
+bool unsorted_map<key_, value_, delta_>::resize(size_type new_capacity) {
     if (new_capacity < size_)
         return false;
 
@@ -335,8 +357,34 @@ bool unsorted_map<K, V, D>::resize(size_type new_capacity) {
     return true;
 }
 
-template <Keyable K, class V, size_t D>
-bool unsorted_map<K, V, D>::gap_(size_type from, size_type length)
+template <Keyable key_, class value_, size_t delta_>
+unsorted_map<key_, value_, delta_> &unsorted_map<key_, value_, delta_>::operator=(const unsorted_map& other) {
+    if (this != &other) {
+        clear();
+        if (other.size_ > capacity_) {
+            reserve(other.size_);
+        }
+        
+        for (size_type i = 0; i < other.size_; ++i) {
+            allocator_traits::construct(allocator_, data_ + i, std::make_pair(other.data_[i].first, other.data[i].second));
+        }
+    }
+
+    return *this;
+}
+
+template <Keyable key_, class value_, size_t delta_>
+unsorted_map<key_, value_, delta_>&  unsorted_map<key_, value_, delta_>::operator=(unsorted_map&& other) {
+    std::swap(other.allocator_, allocator_);
+    std::swap(other.data_, data_);
+    std::swap(other.size_, size_);
+    std::swap(other.capacity_, capacity_);
+
+    return *this;
+}
+
+template <Keyable key_, class value_, size_t delta_>
+bool unsorted_map<key_, value_, delta_>::gap_(size_type from, size_type length)
 {
     bool success = true;
 
