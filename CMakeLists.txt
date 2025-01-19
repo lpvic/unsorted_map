@@ -11,4 +11,6 @@ add_executable(test ./tests/test.cpp)
 add_executable(allocators ./tests/test_allocators.cpp)
 add_executable(for ./tests/for.cpp)
 
-# add_library(unsorted_map SHARED ./include/unsorted_map.hpp)
+add_library(unsorted_map SHARED ./include/unsorted_map.hpp)
+target_compile_definitions(unsorted_map PUBLIC BUILDING_DLL)
+set_target_properties(unsorted_map PROPERTIES LINKER_LANGUAGE CXX)

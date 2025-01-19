@@ -1,6 +1,16 @@
 #ifndef __UNSORTEDMAP_H__
 #define __UNSORTEDMAP_H__
 
+#ifdef _WIN32
+    #ifdef BUILDING_DLL
+        #define DLL_EXPORT __declspec(dllexport)
+    #else
+        #define DLL_EXPORT __declspec(dllimport)
+    #endif
+#else
+    #define DLL_EXPORT
+#endif
+
 #include <iostream>
 #include <initializer_list>
 #include <iterator> // For std::forward_iterator_tag
@@ -14,7 +24,7 @@ template<class T>
 concept Keyable = (requires(T a_, T b_) {a_ == b_;}) && (!std::is_integral<T>::value);
 
 template<Keyable key_, class value_, size_t delta_ = 100>
-class unsorted_map
+class DLL_EXPORT unsorted_map
 {
     public:
         class Iterator;
