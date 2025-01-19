@@ -6,11 +6,16 @@ using  umap = unsorted_map<std::string, size_t, 3>;
 
 void print(std::string name, umap& map) {
     umap::size_type i = 0;
+    std::cout << "    " << name << ":" << std::endl;
     for (umap::iterator it = map.begin(); it != map.end(); it++) {
         std::cout << "    " << name << "[" << i << "]: Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
         std::cout << "-> size = " << map.size() << ", capacity = " << map.capacity() << std::endl;
         i++;
     }
+    if (i == 0) {
+        std::cout << "    Empty" << std::endl;
+    }
+
     std::cout << std::endl;
 }
 
@@ -22,7 +27,7 @@ int main() {
     std::cout << "  Default constructor: ";
     umap m;
     std::cout << umap::allocator_traits::propagate_on_container_copy_assignment::value << "  " << umap::allocator_traits::propagate_on_container_move_assignment::value << "  " << umap::allocator_traits::propagate_on_container_swap::value << std::endl;
-    std::cout << "Object 'm' created -> size = " << m.size() << ", capacity = " << m.capacity() << std::endl << std::endl;
+    std::cout << "    Object 'm' created -> size = " << m.size() << ", capacity = " << m.capacity() << std::endl << std::endl;
     
     std::cout << "  Constructor from initialization list -> ";
     umap n = {{"Cero", 0}, {"Uno", 1}, {"Dos", 2}, {"Tres", 3}};
@@ -40,14 +45,6 @@ int main() {
     std::cout << "umap q(std::move(p));" << std::endl;
     print("p", p);
     print("q", q);
-
-
-/*    std::cout << "* Destructors:" << std::endl;    
-    std::cout << "  Default destructor: ";
-    m.clear();
-    std::cout << "Object 'm' destroyed" << std::endl;
-    std::cout << std::endl;
-*/
 
     std::cout << "* Inserting elements:" << std::endl;
     std::cout << "  push_back(pair) -> ";
@@ -136,5 +133,17 @@ int main() {
     std::cout << "  swap(from, to) -> ";
     n.swap(8, 10);
     std::cout << "n.swap(8, 10);" << std::endl;
+    print("n", n);
+
+    std::cout << "    Copy assignment -> ";
+    p = n;
+    std::cout << "p = n" << std::endl;
+    print("p", p);
+    print("n", n);
+
+    std::cout << "    Move assignment -> ";
+    q = std::move(n);
+    std::cout << "p = std::move(n)" << std::endl;
+    print("q", q);
     print("n", n);
 }

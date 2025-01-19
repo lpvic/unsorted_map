@@ -35,7 +35,7 @@ class unsorted_map
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using size_type = size_t;
         
-        const size_type npos = -1;
+        const size_type npos = std::numeric_limits<size_type>::max();;
 
         class Iterator {
             public:
@@ -45,17 +45,17 @@ class unsorted_map
                 using pointer = value_type*;
                 using reference = value_type&;
 
-                Iterator(pointer ptr) : ptr_(ptr) {}
+                Iterator(pointer ptr = nullptr) : ptr_(ptr) {}
                 reference operator*() const { return *ptr_; }
                 pointer operator->() const { return ptr_; }
                 iterator& operator++() { ++ptr_; return *this; }
                 iterator operator++(int) { iterator tmp = *this; ++ptr_; return tmp; }
                 iterator& operator--() { --ptr_; return *this; }
                 iterator operator--(int) { iterator tmp = *this; --ptr_; return tmp; }
-                bool operator==(const iterator& other) const = default;
-                bool operator!=(const iterator& other) const = default;
+                bool operator==(const iterator& other) const { return ptr_ == other.ptr_; }
+                bool operator!=(const iterator& other) const { return ptr_ != other.ptr_; }
 
-                operator ConstIterator() const { return ConstIterator(ptr_); }
+                operator ConstIterator() const { return static_cast<const_pointer>(ptr_); }
 
             private:
                 pointer ptr_;
@@ -70,18 +70,18 @@ class unsorted_map
                 using pointer = const value_type*;
                 using reference = const value_type&;
 
-                ConstIterator(pointer ptr) : ptr_(ptr) {}
+                ConstIterator(pointer ptr = nullptr) : ptr_(ptr) {}
                 reference operator*() const { return *ptr_; }
                 pointer operator->() const { return ptr_; }
                 ConstIterator& operator++() { ++ptr_; return *this; }
                 ConstIterator operator++(int) { ConstIterator tmp = *this; ++ptr_; return tmp; }
                 ConstIterator& operator--() { --ptr_; return *this; }
                 ConstIterator operator--(int) { ConstIterator tmp = *this; --ptr_; return tmp; }
-                bool operator==(const ConstIterator& other) const = default;
-                bool operator!=(const ConstIterator& other) const = default;
+                bool operator==(const ConstIterator& other) const { return ptr_ == other.ptr_; }
+                bool operator!=(const ConstIterator& other) const { return ptr_ != other.ptr_; }
 
             private:
-                pointer ptr_ = nullptr;
+                pointer ptr_;
         };        
         
         // Constructors and destructors
@@ -117,12 +117,12 @@ class unsorted_map
         void erase(const key_type& key) { erase(at(key).second);  }
         void erase_all(const key_type& key);
         void swap(const size_type from, const size_type to);
+        unsorted_map<key_, value_, delta_>& swap(unsorted_map& a, unsorted_map& b);
         
         // Memory related members
         size_type size() { return size_; }
         size_type capacity() { return capacity_; }
         bool is_empty() { return ((data_ == nullptr) || (size_ == 0)); }
-        // allocator_type get_allocator() { return allocator_; }
         bool reserve(size_type min_capacity);
         bool shrink() { return resize(size_); };
         bool resize(size_type new_capacity);
@@ -158,8 +158,6 @@ class unsorted_map
         size_type size_ = 0;
         size_type capacity_ = 0;
         pointer data_ = nullptr;
-
-        
 };
 
 template <Keyable key_, class value_, size_t delta_>
@@ -327,6 +325,16 @@ inline void unsorted_map<key_, value_, delta_>::swap(const size_type from, const
     allocator_traits::construct(allocator_, data_ + from, temp_);
 }
 
+template <Keyable key_, class value_, size_t delta_> 
+inline unsorted_map<key_, value_, delta_>& unsorted_map<key_, value_, delta_>::swap(unsorted_map &a, unsorted_map &b) {
+    std::swap(other.allocator_, allocator_);
+    std::swap(other.data_, data_);
+    std::swap(other.size_, size_);
+    std::swap(other.capacity_, capacity_);
+
+    return *this;
+}
+
 template <Keyable key_, class value_, size_t delta_>
 inline bool unsorted_map<key_, value_, delta_>::reserve(size_type min_capacity) {
     if (min_capacity < size_)
@@ -366,7 +374,7 @@ unsorted_map<key_, value_, delta_> &unsorted_map<key_, value_, delta_>::operator
         }
         
         for (size_type i = 0; i < other.size_; ++i) {
-            allocator_traits::construct(allocator_, data_ + i, std::make_pair(other.data_[i].first, other.data[i].second));
+            allocator_traits::construct(allocator_, data_ + i, std::make_pair(other.data_[i].first, other.data_[i].second));
         }
     }
 
@@ -374,7 +382,7 @@ unsorted_map<key_, value_, delta_> &unsorted_map<key_, value_, delta_>::operator
 }
 
 template <Keyable key_, class value_, size_t delta_>
-unsorted_map<key_, value_, delta_>&  unsorted_map<key_, value_, delta_>::operator=(unsorted_map&& other) {
+unsorted_map<key_, value_, delta_>& unsorted_map<key_, value_, delta_>::operator=(unsorted_map&& other) {
     std::swap(other.allocator_, allocator_);
     std::swap(other.data_, data_);
     std::swap(other.size_, size_);
