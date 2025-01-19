@@ -8,7 +8,7 @@
 #include <utility> // For std::pair
 #include <vector>
 #include <type_traits>
-#include <ranges>
+#include <limits>
 
 template<class T>
 concept Keyable = (requires(T a_, T b_) {a_ == b_;}) && (!std::is_integral<T>::value);
@@ -35,7 +35,7 @@ class unsorted_map
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using size_type = size_t;
         
-        const size_type npos = std::numeric_limits<size_type>::max();;
+        static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
         class Iterator {
             public:
@@ -382,8 +382,8 @@ unsorted_map<key_, value_, delta_> &unsorted_map<key_, value_, delta_>::operator
 template <Keyable key_, class value_, size_t delta_>
 unsorted_map<key_, value_, delta_>& unsorted_map<key_, value_, delta_>::operator=(unsorted_map&& other) {
     std::swap(other.allocator_, allocator_);
-    std::swap(other.data_, data_);
-    std::swap(other.size_, size_);
+    data_ = std::exchange(other.data_, nullptr);
+    size_ = std::exchange(other.size_, 0);
     std::swap(other.capacity_, capacity_);
 
     return *this;
