@@ -14,3 +14,8 @@ add_executable(for ./tests/for.cpp)
 add_library(unsorted_map SHARED ./include/unsorted_map.hpp)
 target_compile_definitions(unsorted_map PUBLIC BUILDING_DLL)
 set_target_properties(unsorted_map PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(unsorted_map PROPERTIES 
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/umap/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/umap/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/umap/bin"
+)
