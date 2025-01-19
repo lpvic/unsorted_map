@@ -117,7 +117,7 @@ class unsorted_map
         void erase(const key_type& key) { erase(at(key).second);  }
         void erase_all(const key_type& key);
         void swap(const size_type from, const size_type to);
-        unsorted_map<key_, value_, delta_>& swap(unsorted_map& a, unsorted_map& b);
+        void swap(unsorted_map& a, unsorted_map& b);
         
         // Memory related members
         size_type size() { return size_; }
@@ -326,13 +326,11 @@ inline void unsorted_map<key_, value_, delta_>::swap(const size_type from, const
 }
 
 template <Keyable key_, class value_, size_t delta_> 
-inline unsorted_map<key_, value_, delta_>& unsorted_map<key_, value_, delta_>::swap(unsorted_map &a, unsorted_map &b) {
-    std::swap(other.allocator_, allocator_);
-    std::swap(other.data_, data_);
-    std::swap(other.size_, size_);
-    std::swap(other.capacity_, capacity_);
-
-    return *this;
+inline void unsorted_map<key_, value_, delta_>::swap(unsorted_map &a, unsorted_map &b) {
+    std::swap(a.allocator_, b.allocator_);
+    std::swap(a.data_, b.data_);
+    std::swap(a.size_, b.size_);
+    std::swap(a.capacity_, b.capacity_);
 }
 
 template <Keyable key_, class value_, size_t delta_>
