@@ -44,6 +44,7 @@ class DLL_EXPORT unsorted_map
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
         using size_type = size_t;
+        using iterator_pos = std::pair<iterator, size_type>;
         
         static constexpr size_type npos = std::numeric_limits<size_type>::max();
 
@@ -58,6 +59,8 @@ class DLL_EXPORT unsorted_map
                 Iterator(pointer ptr = nullptr) : ptr_(ptr) {}
                 reference operator*() const { return *ptr_; }
                 pointer operator->() const { return ptr_; }
+                iterator operator+(int other) { return ptr_ + other; }
+                iterator operator-(int other) { return ptr_ - other; }
                 iterator& operator++() { ++ptr_; return *this; }
                 iterator operator++(int) { iterator tmp = *this; ++ptr_; return tmp; }
                 iterator& operator--() { --ptr_; return *this; }
@@ -83,6 +86,8 @@ class DLL_EXPORT unsorted_map
                 ConstIterator(pointer ptr = nullptr) : ptr_(ptr) {}
                 reference operator*() const { return *ptr_; }
                 pointer operator->() const { return ptr_; }
+                ConstIterator operator+(int other) { return ptr_ + other; }
+                ConstIterator operator-(int other) { return ptr_ - other; }
                 ConstIterator& operator++() { ++ptr_; return *this; }
                 ConstIterator operator++(int) { ConstIterator tmp = *this; ++ptr_; return tmp; }
                 ConstIterator& operator--() { --ptr_; return *this; }
@@ -116,15 +121,21 @@ class DLL_EXPORT unsorted_map
         iterator push_front(const unsorted_map<key_type, mapped_type, delta_>& map) { return insert(map, 0); }
 
         // Element access
-        iterator at(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : end(); }
-        auto at(const key_type& key);  // return type : std::pair<iterator, size_type>
-        auto all(const key_type& key);  // return type : std::vector<std::pair<iterator, size_type>>
+        iterator get(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : end(); }
+        iterator_pos get(const key_type& key);
+        std::vector<iterator_pos> get_all(const key_type& key);      
+        value_type& get_value(const size_type& pos) { return pos < size_ ? &data_[pos].second : end(); }
+        value_type& get_value(const key_type& key) { return get(key).first->second; }
+        std::vector<value_type> get_all_values(const key_type& key);
+        key_type& get_key(const size_type& pos) { return pos < size_ ? &data_[pos].first : end(); }
+        size_type& get_pos(const key_type& key) { return get(key).second; }
+        std::vector<size_type> get_all_pos(const key_type& key);
         pointer data() { return data_; }
 
         // Element management
         void clear();
         void erase(const size_type pos);
-        void erase(const key_type& key) { erase(at(key).second);  }
+        void erase(const key_type& key) { erase(get(key).second);  }
         void erase_all(const key_type& key);
         void swap(const size_type from, const size_type to);
         void swap(unsorted_map& a, unsorted_map& b);
@@ -276,23 +287,42 @@ unsorted_map<key_, value_, delta_>::iterator unsorted_map<key_, value_, delta_>:
 }
 
 template <Keyable key_, class value_, size_t delta_>
-auto unsorted_map<key_, value_, delta_>::at(const key_type& key) {
+unsorted_map<key_, value_, delta_>::iterator_pos unsorted_map<key_, value_, delta_>::get(const key_type& key) {
     for (size_type i = 0; i < size_; i++) {
         if (data_[i].first == key) {
-            return std::make_pair<>(iterator(&data_[i]), i);
+            return std::move(std::make_pair<>(iterator(&data_[i]), i));
         }
     }
-    return std::make_pair<>(end(), npos);
+    return std::move(std::make_pair<>(end(), npos));
 }
 
 template <Keyable key_, class value_, size_t delta_>
-auto unsorted_map<key_, value_, delta_>::all(const key_type& key) {
-    std::vector<std::pair<iterator, size_type>> out;
+std::vector<typename unsorted_map<key_, value_, delta_>::iterator_pos> unsorted_map<key_, value_, delta_>::get_all(const key_type& key) {
+    std::vector<iterator_pos> out;
     for (size_type i = 0; i < size_; i++)
         if (data_[i].first == key) {
-            std::pair<iterator, size_type> p = std::make_pair<>(&data_[i], i);
-            out.push_back(p);
+            out.push_back(std::make_pair<>(&data_[i], i));
         }
+
+    return out;
+}
+
+template <Keyable key_, class value_, size_t delta_>
+inline std::vector<typename unsorted_map<key_, value_, delta_>::value_type> unsorted_map<key_, value_, delta_>::get_all_values(const key_type &key) {
+    std::vector<value_type> out;
+    for (auto elem : get_all(key)) {
+        out.push_back(elem.first->second);
+    }
+
+    return out;
+}
+
+template <Keyable key_, class value_, size_t delta_>
+inline std::vector<typename unsorted_map<key_, value_, delta_>::size_type> unsorted_map<key_, value_, delta_>::get_all_pos(const key_type &key) {
+    std::vector<size_type> out;
+    for (auto elem : get_all(key)) {
+        out.push_back(elem.second);
+    }
 
     return out;
 }
@@ -318,7 +348,7 @@ void unsorted_map<key_, value_, delta_>::erase(const size_type pos) {
 template <Keyable key_, class value_, size_t delta_>
 void unsorted_map<key_, value_, delta_>::erase_all(const key_type &key)
 {
-    auto v = all(key);
+    auto v = get_all(key);
     for (auto it = v.rbegin(); it != v.rend(); ++it) {
         erase(it->second);
     }

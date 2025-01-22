@@ -1355,6 +1355,13 @@
 			}
 		},
 		{
+			"scope": "keyword",
+			"settings": {
+				"foreground": "#50AACD",
+				"fontStyle": "italic"
+			}
+		},
+		{
 			"scope": "punctuation.definition.delayed.unison,punctuation.definition.list.begin.unison,punctuation.definition.list.end.unison,punctuation.definition.ability.begin.unison,punctuation.definition.ability.end.unison,punctuation.operator.assignment.as.unison,punctuation.separator.pipe.unison,punctuation.separator.delimiter.unison,punctuation.definition.hash.unison",
 			"settings": {
 				"foreground": "#D6D8D9"
@@ -1706,9 +1713,10 @@
 			}
 		},
 		{
-			"scope": "keyword.operator.assignment.c,keyword.operator.comparison.c,keyword.operator.c,keyword.operator.increment.c,keyword.operator.decrement.c,keyword.operator.bitwise.shift.c,keyword.operator.assignment.cpp,keyword.operator.comparison.cpp,keyword.operator.cpp,keyword.operator.increment.cpp,keyword.operator.decrement.cpp,keyword.operator.bitwise.shift.cpp",
+			"scope": "keyword.operator",
 			"settings": {
-				"foreground": "#50AACD"
+				"foreground": "#50AACD",
+				"fontStyle": ""
 			}
 		},
 		{
@@ -1793,13 +1801,6 @@
 			"scope": "keyword.operator.assignment.compound.js,keyword.operator.assignment.compound.ts",
 			"settings": {
 				"foreground": "#7DAFCD"
-			}
-		},
-		{
-			"scope": "keyword",
-			"settings": {
-				"foreground": "#50AACD",
-				"fontStyle": "italic"
 			}
 		},
 		{

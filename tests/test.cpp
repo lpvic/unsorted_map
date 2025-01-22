@@ -108,7 +108,7 @@ int main() {
     print("n", n);
 
     std::cout << "  all(key) -> ";
-    auto v = n.all("Seis");
+    auto v = n.get_all("Seis");
     std::cout << "n.all(\"Seis\");" << std::endl;
     for (auto e : v) {
         std::cout << "    (" << e.first->first << " , " << e.first->second << ") " << e.second << std::endl;
