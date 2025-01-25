@@ -60,8 +60,8 @@ namespace com {
                     Iterator(pointer ptr = nullptr) : ptr_(ptr) {}
                     reference operator*() const { return *ptr_; }
                     pointer operator->() const { return ptr_; }
-                    iterator operator+(int other) { return ptr_ + other; }
-                    iterator operator-(int other) { return ptr_ - other; }
+                    iterator operator+(int other) { return iterator(ptr_ + other); }
+                    iterator operator-(int other) { return iterator(ptr_ - other); }
                     iterator& operator++() { ++ptr_; return *this; }
                     iterator operator++(int) { iterator tmp = *this; ++ptr_; return tmp; }
                     iterator& operator--() { --ptr_; return *this; }
@@ -87,8 +87,8 @@ namespace com {
                     ConstIterator(pointer ptr = nullptr) : ptr_(ptr) {}
                     reference operator*() const { return *ptr_; }
                     pointer operator->() const { return ptr_; }
-                    ConstIterator operator+(int other) { return ptr_ + other; }
-                    ConstIterator operator-(int other) { return ptr_ - other; }
+                    ConstIterator operator+(int other) { return const_iterator(ptr_ + other); }
+                    ConstIterator operator-(int other) { return const_iterator(ptr_ - other); }
                     ConstIterator& operator++() { ++ptr_; return *this; }
                     ConstIterator operator++(int) { ConstIterator tmp = *this; ++ptr_; return tmp; }
                     ConstIterator& operator--() { --ptr_; return *this; }
