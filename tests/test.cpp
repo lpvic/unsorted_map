@@ -2,7 +2,7 @@
 
 #include <string>
 
-using  umap = unsorted_map<std::string, size_t, 3>;
+using  umap = com::unsorted_map<std::string, size_t, 3>;
 
 void print(std::string name, umap& map) {
     umap::size_type i = 0;
