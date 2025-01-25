@@ -125,10 +125,10 @@ namespace com {
             iterator get(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : end(); }
             iterator_pos get(const key_type& key);
             std::vector<iterator_pos> get_all(const key_type& key);      
-            value_type& get_value(const size_type& pos) { return pos < size_ ? &data_[pos].second : end(); }
-            value_type& get_value(const key_type& key) { return get(key).first->second; }
-            std::vector<value_type> get_all_values(const key_type& key);
-            key_type& get_key(const size_type& pos) { return pos < size_ ? &data_[pos].first : end(); }
+            mapped_type& get_value(const size_type& pos) { return pos < size_ ? data_[pos].second : void_mapped_type_; }
+            mapped_type& get_value(const key_type& key) { return get(key).first->second; }
+            std::vector<mapped_type> get_all_values(const key_type& key);
+            key_type& get_key(const size_type& pos) { return pos < size_ ? &data_[pos].first : void_key_type_; }
             size_type& get_pos(const key_type& key) { return get(key).second; }
             std::vector<size_type> get_all_pos(const key_type& key);
             pointer data() { return data_; }
@@ -180,6 +180,8 @@ namespace com {
             size_type size_ = 0;
             size_type capacity_ = 0;
             pointer data_ = nullptr;
+            mapped_type void_mapped_type_;
+            key_type void_key_type_;
     };
 
     template <Keyable key_, class value_, size_t delta_>
@@ -309,7 +311,7 @@ namespace com {
     }
 
     template <Keyable key_, class value_, size_t delta_>
-    inline std::vector<typename unsorted_map<key_, value_, delta_>::value_type> unsorted_map<key_, value_, delta_>::get_all_values(const key_type &key) {
+    inline std::vector<typename unsorted_map<key_, value_, delta_>::mapped_type> unsorted_map<key_, value_, delta_>::get_all_values(const key_type &key) {
         std::vector<value_type> out;
         for (auto elem : get_all(key)) {
             out.push_back(elem.first->second);
