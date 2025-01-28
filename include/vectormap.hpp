@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <initializer_list>
-#include <iterator> // For std::forward_iterator_tag
-#include <cstddef> // For std::ptrdiff_t
-#include <utility> // For std::pair
+#include <iterator>
+#include <cstddef>
+#include <utility>
 #include <vector>
 #include <type_traits>
 #include <limits>
@@ -357,20 +357,28 @@ namespace com {
     template <DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
     inline void vectormap<key_, value_, delta_>::move(const size_type from, const size_type to) {
         if ((from < size_) && (to < size_)) {
-            gap_(from, 1);
-        }
-        
+            gap_(to, 1);
+            allocator_traits::construct(allocator_, data_ + to, std::move(data_[from + 1]));
+            allocator_traits::destroy(allocator_, data_ + from + 1);
+            for (size_type i = from + 1; i < size_; ++i) {
+                allocator_traits::construct(allocator_, data_ + i, std::move(data_[i + 1]));
+                allocator_traits::destroy(allocator_, data_ + i + 1);
+            }
+            --size_;
+        }        
     }
 
     template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
     inline void vectormap<key_, value_, delta_>::swap(const size_type from, const size_type to)
     {
-        value_type temp_ = data_[to];
+        if ((from < size_) && (to < size_)) {
+            value_type temp_ = data_[to];
 
-        allocator_traits::destroy(allocator_, data_ + to);
-        allocator_traits::construct(allocator_, data_ + to, std::move(data_[from]));
-        allocator_traits::destroy(allocator_, data_ + from);
-        allocator_traits::construct(allocator_, data_ + from, temp_);
+            allocator_traits::destroy(allocator_, data_ + to);
+            allocator_traits::construct(allocator_, data_ + to, std::move(data_[from]));
+            allocator_traits::destroy(allocator_, data_ + from);
+            allocator_traits::construct(allocator_, data_ + from, temp_);
+        }
     }
 
     template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_> 

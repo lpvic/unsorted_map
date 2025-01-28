@@ -143,7 +143,14 @@ int main() {
 
     std::cout << "    Move assignment -> ";
     q = std::move(n);
-    std::cout << "p = std::move(n)" << std::endl;
+    std::cout << "p = std::move(n);" << std::endl;
     print("q", q);
     print("n", n);
+
+    std::cout << "    Move element -> ";
+    q.move(10, 2);
+    std::cout << "q.move(4, 2);" << std::endl;
+    print("q", q);
+
+    std::cout << "Exit with no errors" << std::endl;
 }
