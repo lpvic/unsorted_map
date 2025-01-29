@@ -117,22 +117,29 @@ namespace com {
 
             // Element access
             iterator get(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : end(); }
-            iterator_pos get(const key_type& key);
+            iterator_pos get(const key_type& key, size_type ordinal = 1);
             std::vector<iterator_pos> get_all(const key_type& key);      
             mapped_type& get_value(const size_type& pos) { return pos < size_ ? data_[pos].second : void_mapped_type_; }
-            mapped_type& get_value(const key_type& key) { return get(key).first->second; }
+            mapped_type& get_value(const key_type& key, size_type ordinal = 1) { return get(key, ordinal).first->second; }
             std::vector<mapped_type> get_all_values(const key_type& key);
             key_type& get_key(const size_type& pos) { return pos < size_ ? &data_[pos].first : void_key_type_; }
-            size_type& get_pos(const key_type& key) { return get(key).second; }
+            size_type get_pos(const key_type& key, size_type ordinal = 1) { return get(key, ordinal).second; }
             std::vector<size_type> get_all_pos(const key_type& key);
             pointer data() { return data_; }
 
             // Element modification
+            void set(const value_type& new_value, const size_type pos) { data_[pos] = new_value; }
+            void set(const value_type& new_value, const key_type& key, size_type ordinal = 1) { get(key, ordinal).first = new_value; }
+            void set_value(const mapped_type& new_mapped_value, const size_type pos) { data_[pos].second = new_mapped_value; }
+            void set_value(const mapped_type& new_mapped_value, const key_type& key, size_type ordinal = 1){ get_value(key, ordinal) = new_mapped_value; }
+            void set_key(const key_type& new_key, const size_type pos) { data_[pos].first = new_key; }
+            void set_key(const key_type& new_key, const key_type& key, size_type ordinal = 1) { get(key, ordinal).first->first = new_key; }
 
             // Element management
             void clear();
             void erase(const size_type pos);
             void erase(const key_type& key) { erase(get(key).second);  }
+            void erase(const std::initializer_list<size_type>& il);
             void erase_all(const key_type& key);
             void move(const size_type from, const size_type to);
             void swap(const size_type from, const size_type to);
@@ -287,10 +294,16 @@ namespace com {
     }
 
     template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
-    vectormap<key_, value_, delta_>::iterator_pos vectormap<key_, value_, delta_>::get(const key_type& key) {
+    vectormap<key_, value_, delta_>::iterator_pos vectormap<key_, value_, delta_>::get(const key_type& key, const size_type ordinal) {
+        size_type count = 1;
         for (size_type i = 0; i < size_; i++) {
             if (data_[i].first == key) {
-                return std::move(std::make_pair<>(iterator(&data_[i]), i));
+                if (count == ordinal) {
+                    return std::move(std::make_pair<>(iterator(&data_[i]), i));
+                }
+                else {
+                    ++count;
+                }
             }
         }
         return std::move(std::make_pair<>(end(), npos));
@@ -345,7 +358,14 @@ namespace com {
         }
     }
 
-    template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
+    template <DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
+    inline void vectormap<key_, value_, delta_>::erase(const std::initializer_list<size_type> &il) {
+        for (auto elem : il) {
+            erase(elem);
+        }
+    }
+
+    template <DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
     void vectormap<key_, value_, delta_>::erase_all(const key_type &key)
     {
         auto v = get_all(key);
