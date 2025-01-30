@@ -107,14 +107,98 @@ int main() {
     std::cout << "n.push_front(m);" << std::endl;
     print("n", n);
 
-    std::cout << "  all(key) -> ";
+    std::cout << "* Element access:" << std::endl;
+    std::cout << "  get(pos) -> ";
+    it = n.get(3);
+    std::cout << "n.get(3);" << std::endl;
+    std::cout << "    (\"" << it->first << "\" , " << it->second << ")" << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get(key) -> ";
+    auto it_pos = n.get("Cero");
+    std::cout << "n.get(\"Cero\");" << std::endl;
+    std::cout << "    <<(\"" << it_pos.first->first << "\" , " << it_pos.first->second << ") , " << it_pos.second << ">>" << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get(key, ordinal) -> ";
+    it_pos = n.get("Seis", 2);
+    std::cout << "n.get(\"Seis\", 2);" << std::endl;
+    std::cout << "    <<(\"" << it_pos.first->first << "\" , " << it_pos.first->second << ") , " << it_pos.second << ">>" << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get_all(key) -> ";
     auto v = n.get_all("Seis");
-    std::cout << "n.all(\"Seis\");" << std::endl;
+    std::cout << "n.get_all(\"Seis\");" << std::endl;
     for (auto e : v) {
-        std::cout << "    (" << e.first->first << " , " << e.first->second << ") " << e.second << std::endl;
+        std::cout << "    (\"" << e.first->first << "\" , " << e.first->second << ") " << e.second << std::endl;
     }
     std::cout << std::endl;
 
+    std::cout << "  get_value(pos) -> ";
+    int val = n.get_value(16);
+    std::cout << "n.get_value(16);" << std::endl;
+    std::cout << "    " << val << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get_value(key) -> ";
+    val = n.get_value("Cero");
+    std::cout << "n.get_value(\"Cero\");" << std::endl;
+    std::cout << "    " << val << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get_value(key, ordinal) -> ";
+    val = n.get_value("Siete", 2);
+    std::cout << "n.get_value(\"Siete\", 2);" << std::endl;
+    std::cout << "    " << val << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get_all_values(key) -> ";
+    auto vval = n.get_all_values("Siete");
+    std::cout << "n.get_all_values(\"Siete\");" << std::endl;
+    std::cout << "    ";
+    for (auto e : vval) {
+        std::cout << e << " ";
+    }
+    std::cout << std::endl << std::endl;
+
+    std::cout << "  get_key(pos) -> ";
+    auto key = n.get_key(10);
+    std::cout << "n.get_key(10);" << std::endl;
+    std::cout << "    " << key << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get_pos(key) -> ";
+    auto pos = n.get_pos("Doce");
+    std::cout << "n.get_pos(\"Doce\");" << std::endl;
+    std::cout << "    " << pos << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get_pos(key, ordinal) -> ";
+    pos = n.get_pos("Seis", 2);
+    std::cout << "n.get_pos(\"Seis\", 2);" << std::endl;
+    std::cout << "    " << pos << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "  get_all_pos(key) -> ";
+    auto vpos = n.get_all_pos("Siete");
+    std::cout << "n.get_all_pos(\"Siete\");" << std::endl;
+    std::cout << "    ";
+    for (auto e : vpos) {
+        std::cout << e << " ";
+    }
+    std::cout << std::endl << std::endl;
+
+    std::cout << "  data() -> ";
+    auto ptr = n.data();
+    std::cout << "n.data();" << std::endl;
+    std::cout << "    " << ptr << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "* Element modification:" << std::endl;
+
+    
+
+    std::cout << "* Element management:" << std::endl;
     std::cout << "  erase(pos) -> ";
     n.erase(7);
     std::cout << "n.erase(7);" << std::endl;

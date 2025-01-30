@@ -18,6 +18,14 @@ namespace com {
     template<class T>
     concept DefaultInitializableKeyable = Keyable<T> && std::default_initializable<T>;
 
+    /**
+     * @brief Container that stores pairs of key / value respecting the insert order.
+     *        It can be described as a vector with map functionality.
+     * 
+     * @tparam key_   Type of the key.
+     * @tparam value_ Type of the value.
+     * @tparam delta_ Number of new elements to allocate every time the container growths.
+     */
     template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_ = 100>
     class vectormap
     {
@@ -25,13 +33,14 @@ namespace com {
             class Iterator;
             class ConstIterator;
 
+            /** @cond */
             using key_type = key_;
             using mapped_type = value_;
             using value_type = std::pair<const key_type, mapped_type>;
             using allocator_type = std::allocator<value_type>;
             using allocator_traits = std::allocator_traits<allocator_type>;
-            using reference = value_type&;
-            using const_reference = const value_type&;
+            //using reference = value_type&;
+            //using const_reference = const value_type&;
             using pointer = value_type*;
             using const_pointer = const value_type*;
             using iterator = Iterator;
@@ -42,6 +51,8 @@ namespace com {
             using iterator_pos = std::pair<iterator, size_type>;
             
             static constexpr size_type npos = std::numeric_limits<size_type>::max();
+
+            /** @endcond */
 
             class Iterator {
                 public:
@@ -94,19 +105,64 @@ namespace com {
                     pointer ptr_;
             };        
             
-            // Constructors and destructors
+            
+            /** @name Constructors */
+            /** @{ */
+
+            /**
+             * @brief Default constructor.
+             * 
+             */
             vectormap() : capacity_(0), size_(0), data_(nullptr) {};
+
+            /**
+             * @brief Construct a new vectormap object from a list.
+             * 
+             * @param il List with the elements.
+             */
             vectormap(const std::initializer_list<value_type>& il);
+
+            /**
+             * @brief Copy constructor.\n 
+             *        Constructs a new vectormap object from another vectormap object.
+             * 
+             * @param other 
+             */
             vectormap(const vectormap& other);
+
+            /**
+             * @brief Construct a new vectormap object
+             * 
+             * @param other 
+             */
             vectormap(vectormap&& other) noexcept(allocator_traits::is_always_equal::value);
+            /** @} */
+
+            // Destructor
             ~vectormap();
 
-            // Element addition
+
+            /** @name Element insertion
+             */
+            /** @{ */
             iterator insert(const value_type& val, const size_type pos);
             iterator insert(const key_type& key, const mapped_type& val, const size_type pos) { return insert(std::make_pair<>(key, val), pos); }
             iterator insert(const std::initializer_list<value_type>& il, const size_type pos);
             iterator insert(const vectormap<key_type, mapped_type, delta_>& map, const size_type pos);
+            /**
+             * @brief Adds an element at the end of the vectormap.
+             * 
+             * @param val        Element to be added at the end of the vectormap.
+             * @return iterator  Iterator pointing to the added element.
+             */
             iterator push_back(const value_type& val) { return insert(val, size_); }
+            /**
+             * @brief Adds an element at the end of the vectormap.
+             * 
+             * @param key        The key of the element.
+             * @param val        The value of the element.
+             * @return iterator  Iterator pointing to the added element.
+             */
             iterator push_back(const key_type& key, const mapped_type& val) { return insert(key, val, size_); }
             iterator push_back(const std::initializer_list<value_type>& il) { return insert(il, size_); }
             iterator push_back(const vectormap<key_type, mapped_type, delta_>& map) { return insert(map, size_); }
@@ -114,28 +170,36 @@ namespace com {
             iterator push_front(const key_type& key, const mapped_type& val) { return insert(key, val, 0); }
             iterator push_front(const std::initializer_list<value_type>& il) { return insert(il, 0); }
             iterator push_front(const vectormap<key_type, mapped_type, delta_>& map) { return insert(map, 0); }
+            /** @} */
 
-            // Element access
+
+
+            /** @name Element access */
+            /** @{ */
             iterator get(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : end(); }
             iterator_pos get(const key_type& key, size_type ordinal = 1);
             std::vector<iterator_pos> get_all(const key_type& key);      
             mapped_type& get_value(const size_type& pos) { return pos < size_ ? data_[pos].second : void_mapped_type_; }
             mapped_type& get_value(const key_type& key, size_type ordinal = 1) { return get(key, ordinal).first->second; }
             std::vector<mapped_type> get_all_values(const key_type& key);
-            key_type& get_key(const size_type& pos) { return pos < size_ ? &data_[pos].first : void_key_type_; }
+            const key_type& get_key(const size_type& pos) { return pos < size_ ? data_[pos].first : void_key_type_; }
             size_type get_pos(const key_type& key, size_type ordinal = 1) { return get(key, ordinal).second; }
             std::vector<size_type> get_all_pos(const key_type& key);
             pointer data() { return data_; }
+            /** @} */
 
-            // Element modification
+            /** @name  Element modification */
+            /** @{ */
             void set(const value_type& new_value, const size_type pos) { data_[pos] = new_value; }
             void set(const value_type& new_value, const key_type& key, size_type ordinal = 1) { get(key, ordinal).first = new_value; }
             void set_value(const mapped_type& new_mapped_value, const size_type pos) { data_[pos].second = new_mapped_value; }
             void set_value(const mapped_type& new_mapped_value, const key_type& key, size_type ordinal = 1){ get_value(key, ordinal) = new_mapped_value; }
             void set_key(const key_type& new_key, const size_type pos) { data_[pos].first = new_key; }
             void set_key(const key_type& new_key, const key_type& key, size_type ordinal = 1) { get(key, ordinal).first->first = new_key; }
+            /** @} */
 
-            // Element management
+            /** @name  Element management */
+            /** @{ */
             void clear();
             void erase(const size_type pos);
             void erase(const key_type& key) { erase(get(key).second);  }
@@ -144,20 +208,26 @@ namespace com {
             void move(const size_type from, const size_type to);
             void swap(const size_type from, const size_type to);
             void swap(vectormap& a, vectormap& b);
+            /** @} */
             
-            // Memory related members
+            /** @name  Memory manipulation */
+            /** @{ */
             size_type size() { return size_; }
             size_type capacity() { return capacity_; }
             bool is_empty() { return ((data_ == nullptr) || (size_ == 0)); }
             bool reserve(size_type min_capacity);
             bool shrink() { return resize(size_); };
             bool resize(size_type new_capacity);
+            /** @} */
 
-            // Operators
+            /** @name  Operators */
+            /** @{ */
             vectormap& operator=(const vectormap& other);
             vectormap& operator=(vectormap&& other);
+            /** @} */
 
-            // Iterators
+            /** @name  Iterators */
+            /** @{ */
             iterator begin() { return iterator(data_); }
             iterator end() { return iterator(data_ + size_); }
 
@@ -176,8 +246,9 @@ namespace com {
 
             iterator last() { return iterator(data_ + size_ - 1); }
             const_iterator last() const { return const_iterator(data_ + size_ - 1); }
+            /** @} */
 
-            bool gap_(size_type from, size_type length);
+            
 
         private:
             allocator_type allocator_;
@@ -186,6 +257,7 @@ namespace com {
             pointer data_ = nullptr;
             mapped_type void_mapped_type_;
             key_type void_key_type_;
+            bool gap_(size_type from, size_type length);
     };
 
     template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
@@ -321,8 +393,8 @@ namespace com {
     }
 
     template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
-    inline std::vector<typename vectormap<key_, value_, delta_>::mapped_type> vectormap<key_, value_, delta_>::get_all_values(const key_type &key) {
-        std::vector<value_type> out;
+    std::vector<typename vectormap<key_, value_, delta_>::mapped_type> vectormap<key_, value_, delta_>::get_all_values(const key_type &key) {
+        std::vector<mapped_type> out;
         for (auto elem : get_all(key)) {
             out.push_back(elem.first->second);
         }
