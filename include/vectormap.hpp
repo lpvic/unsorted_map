@@ -39,8 +39,8 @@ namespace com {
             using value_type = std::pair<const key_type, mapped_type>;
             using allocator_type = std::allocator<value_type>;
             using allocator_traits = std::allocator_traits<allocator_type>;
-            //using reference = value_type&;
-            //using const_reference = const value_type&;
+            using reference = value_type&;
+            using const_reference = const value_type&;
             using pointer = value_type*;
             using const_pointer = const value_type*;
             using iterator = Iterator;
