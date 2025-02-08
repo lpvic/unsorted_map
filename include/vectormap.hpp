@@ -172,18 +172,16 @@ namespace com {
             iterator push_front(const vectormap<key_type, mapped_type, delta_>& map) { return insert(map, 0); }
             /** @} */
 
-
-
             /** @name Element access */
             /** @{ */
             iterator get(const size_type pos) { return pos < size_ ? iterator(&data_[pos]) : end(); }
-            iterator_pos get(const key_type& key, size_type ordinal = 1);
+            std::vector<iterator_pos> get(const key_type& key, size_type ordinal = 1, size_type number = 1);
             std::vector<iterator_pos> get_all(const key_type& key);      
             mapped_type& get_value(const size_type& pos) { return pos < size_ ? data_[pos].second : void_mapped_type_; }
-            mapped_type& get_value(const key_type& key, size_type ordinal = 1) { return get(key, ordinal).first->second; }
+            std::vector<mapped_type> get_value(const key_type& key, size_type ordinal = 1, size_type number = 1);
             std::vector<mapped_type> get_all_values(const key_type& key);
             const key_type& get_key(const size_type& pos) { return pos < size_ ? data_[pos].first : void_key_type_; }
-            size_type get_pos(const key_type& key, size_type ordinal = 1) { return get(key, ordinal).second; }
+            std::vector<size_type> get_pos(const key_type& key, size_type ordinal = 1, size_type number = 1);
             std::vector<size_type> get_all_pos(const key_type& key);
             pointer data() { return data_; }
             /** @} */
@@ -366,19 +364,27 @@ namespace com {
     }
 
     template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
-    vectormap<key_, value_, delta_>::iterator_pos vectormap<key_, value_, delta_>::get(const key_type& key, const size_type ordinal) {
-        size_type count = 1;
-        for (size_type i = 0; i < size_; i++) {
+    std::vector<typename vectormap<key_, value_, delta_>::iterator_pos> vectormap<key_, value_, delta_>::get(const key_type& key, const size_type ordinal, size_type number) {
+        std::vector<iterator_pos> out;
+        size_type order = 1;
+        
+        for (size_type i = 0; i < size_; ++i) {
             if (data_[i].first == key) {
-                if (count == ordinal) {
-                    return std::move(std::make_pair<>(iterator(&data_[i]), i));
+                if ((order >= ordinal) && (out.size() == (number - 1))) {
+                    out.push_back(std::make_pair(iterator(&data_[i]), i));
+                    return std::move(out);
+                }
+                else if (order >= ordinal) {
+                    out.push_back(std::make_pair(iterator(&data_[i]), i));
+                    ++order;
                 }
                 else {
-                    ++count;
+                    ++order;
                 }
             }
         }
-        return std::move(std::make_pair<>(end(), npos));
+
+        return std::move(out);
     }
 
     template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
@@ -392,8 +398,22 @@ namespace com {
         return out;
     }
 
-    template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
-    std::vector<typename vectormap<key_, value_, delta_>::mapped_type> vectormap<key_, value_, delta_>::get_all_values(const key_type &key) {
+    template <DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
+    inline std::vector<typename vectormap<key_, value_, delta_>::mapped_type> vectormap<key_, value_, delta_>::get_value(const key_type &key, size_type ordinal, size_type number)
+    {
+        std::vector<mapped_type> out;
+        std::vector<iterator_pos> get_ = get(key, ordinal, number);
+
+        for (size_type i = 0; i < get_.size(); ++i) {
+            out.push_back(get_.at(i).first->second);
+        }
+
+        return std::move(out);
+    }
+
+    template <DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
+    std::vector<typename vectormap<key_, value_, delta_>::mapped_type> vectormap<key_, value_, delta_>::get_all_values(const key_type &key)
+    {
         std::vector<mapped_type> out;
         for (auto elem : get_all(key)) {
             out.push_back(elem.first->second);
@@ -402,8 +422,22 @@ namespace com {
         return out;
     }
 
-    template<DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
-    inline std::vector<typename vectormap<key_, value_, delta_>::size_type> vectormap<key_, value_, delta_>::get_all_pos(const key_type &key) {
+    template <DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
+    inline std::vector<typename vectormap<key_, value_, delta_>::size_type> vectormap<key_, value_, delta_>::get_pos(const key_type &key, size_type ordinal, size_type number)
+    {
+        std::vector<mapped_type> out;
+        std::vector<iterator_pos> get_ = get(key, ordinal, number);
+
+        for (size_type i = 0; i < get_.size(); ++i) {
+            out.push_back(get_.at(i).second);
+        }
+
+        return std::move(out);
+    }
+
+    template <DefaultInitializableKeyable key_, std::default_initializable value_, size_t delta_>
+    inline std::vector<typename vectormap<key_, value_, delta_>::size_type> vectormap<key_, value_, delta_>::get_all_pos(const key_type &key)
+    {
         std::vector<size_type> out;
         for (auto elem : get_all(key)) {
             out.push_back(elem.second);

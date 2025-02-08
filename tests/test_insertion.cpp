@@ -1,89 +1,14 @@
 #include "vectormap.hpp"
 #include "gtest/gtest.h"
 
-#include <iostream>
-
 using  vmap = com::vectormap<std::string, size_t, 3>;
-
-void print(std::string name, vmap& map) {
-    vmap::size_type i = 0;
-    std::cout << "    " << name << ":" << std::endl;
-    for (vmap::iterator it = map.begin(); it != map.end(); it++) {
-        std::cout << "    " << name << "[" << i << "]: Addr: " << &(*it) << " / (\"" << it->first << "\" , " << it->second << ") ";
-        std::cout << "-> size = " << map.size() << ", capacity = " << map.capacity() << std::endl;
-        i++;
-    }
-    if (i == 0) {
-        std::cout << "    Empty" << std::endl;
-    }
-
-    std::cout << std::endl;
-}
-
-class VectorMapTestConstructors : public ::testing::Test {
-    protected:
-        vmap m;
-        vmap n = {{"Cero", 0}, {"Uno", 1}, {"Dos", 2}, {"Tres", 3}};
-        vmap p = vmap(n);
-        vmap q = vmap(n);
-        vmap r = vmap(std::move(q));
-};
 
 class VectorMapTestInsertion : public ::testing::Test {
     protected:
         vmap n = {{"Cero", 0}, {"Uno", 1}, {"Dos", 2}, {"Tres", 3}, {"Cuatro", 4}, {"Cinco", 5}, {"Seis", 6}, {"Siete", 7}, {"Ocho", 8}};
 };
 
-TEST_F(VectorMapTestConstructors, DefaultConstructor) {
-    EXPECT_EQ(m.size(), 0);
-    EXPECT_EQ(m.capacity(), 0);
-    EXPECT_EQ(m.data(), nullptr);
-}
-
-TEST_F(VectorMapTestConstructors, ConstructorFromInitList) {
-    EXPECT_EQ(n.size(), 4);
-    EXPECT_EQ(n.capacity(), 6);
-    EXPECT_EQ(n.data()[0].first, "Cero");
-    EXPECT_EQ(n.data()[1].first, "Uno");
-    EXPECT_EQ(n.data()[2].first, "Dos");
-    EXPECT_EQ(n.data()[3].first, "Tres");
-    EXPECT_EQ(n.data()[0].second, 0);
-    EXPECT_EQ(n.data()[1].second, 1);
-    EXPECT_EQ(n.data()[2].second, 2);
-    EXPECT_EQ(n.data()[3].second, 3);
-}
-
-TEST_F(VectorMapTestConstructors, CopyConstructor) {
-    EXPECT_EQ(p.size(), 4);
-    EXPECT_EQ(p.capacity(), 6);
-    EXPECT_EQ(p.data()[0].first, "Cero");
-    EXPECT_EQ(p.data()[1].first, "Uno");
-    EXPECT_EQ(p.data()[2].first, "Dos");
-    EXPECT_EQ(n.data()[3].first, "Tres");
-    EXPECT_EQ(p.data()[0].second, 0);
-    EXPECT_EQ(p.data()[1].second, 1);
-    EXPECT_EQ(p.data()[2].second, 2);
-    EXPECT_EQ(n.data()[3].second, 3);
-}
-
-TEST_F(VectorMapTestConstructors, MoveConstructor) {
-    EXPECT_EQ(r.size(), 4);
-    EXPECT_EQ(r.capacity(), 6);
-    EXPECT_EQ(r.data()[0].first, "Cero");
-    EXPECT_EQ(r.data()[1].first, "Uno");
-    EXPECT_EQ(r.data()[2].first, "Dos");
-    EXPECT_EQ(r.data()[3].first, "Tres");
-    EXPECT_EQ(r.data()[0].second, 0);
-    EXPECT_EQ(r.data()[1].second, 1);
-    EXPECT_EQ(r.data()[2].second, 2);
-    EXPECT_EQ(r.data()[3].second, 3);
-
-    EXPECT_EQ(q.size(), 0);
-    EXPECT_EQ(q.capacity(), 0);
-    EXPECT_EQ(q.data(), nullptr);
-}
-
-TEST_F(VectorMapTestInsertion, Insert_pair_pos) {
+TEST_F(VectorMapTestInsertion, InsertPairPos) {
     const vmap::key_type k = "Nueve";
     const vmap::size_type v = 9;
     const vmap::size_type pos = 3;
@@ -98,7 +23,7 @@ TEST_F(VectorMapTestInsertion, Insert_pair_pos) {
     EXPECT_EQ(it->second, v);
 }
 
-TEST_F(VectorMapTestInsertion, Insert_key_val_pos) {
+TEST_F(VectorMapTestInsertion, InsertKeyValPos) {
     const vmap::key_type k = "Nueve";
     const vmap::size_type v = 9;
     const vmap::size_type pos = 3;
@@ -113,7 +38,7 @@ TEST_F(VectorMapTestInsertion, Insert_key_val_pos) {
     EXPECT_EQ(it->second, v);
 }
 
-TEST_F(VectorMapTestInsertion, Insert_init_list) {
+TEST_F(VectorMapTestInsertion, InsertInitList) {
     vmap::iterator it = n.insert({{"Nueve", 9}, {"Diez", 10}}, 3);
 
     EXPECT_EQ(n.size(), 11);
@@ -127,7 +52,7 @@ TEST_F(VectorMapTestInsertion, Insert_init_list) {
     EXPECT_EQ(it->second, 9);
 }
 
-TEST_F(VectorMapTestInsertion, Insert_vectormap) {
+TEST_F(VectorMapTestInsertion, InsertVectormap) {
     vmap p = {{"Nueve", 9}, {"Diez", 10}};
     vmap::iterator it = n.insert(p, 3);
 
@@ -142,7 +67,7 @@ TEST_F(VectorMapTestInsertion, Insert_vectormap) {
     EXPECT_EQ(it->second, 9);
 }
 
-TEST_F(VectorMapTestInsertion, PushBack_pair) {
+TEST_F(VectorMapTestInsertion, PushBackPair) {
     const vmap::key_type k = "Nueve";
     const vmap::size_type v = 9;
     vmap::iterator it = n.push_back(std::make_pair(k, v));
@@ -156,7 +81,7 @@ TEST_F(VectorMapTestInsertion, PushBack_pair) {
     EXPECT_EQ(it->second, v);
 }
 
-TEST_F(VectorMapTestInsertion, PushBack_key_val) {
+TEST_F(VectorMapTestInsertion, PushBackKeyVal) {
     const vmap::key_type k = "Nueve";
     const vmap::size_type v = 9;
     vmap::iterator it = n.push_back(k, v);
@@ -170,7 +95,7 @@ TEST_F(VectorMapTestInsertion, PushBack_key_val) {
     EXPECT_EQ(it->second, v);
 }
 
-TEST_F(VectorMapTestInsertion, PushBack_init_list) {
+TEST_F(VectorMapTestInsertion, PushBackInitList) {
     vmap::iterator it = n.push_back({{"Nueve", 9}, {"Diez", 10}});
 
     EXPECT_EQ(n.size(), 11);
@@ -184,7 +109,7 @@ TEST_F(VectorMapTestInsertion, PushBack_init_list) {
     EXPECT_EQ(it->second, 9);
 }
 
-TEST_F(VectorMapTestInsertion, PushBack_vectormap) {
+TEST_F(VectorMapTestInsertion, PushBackVectormap) {
     vmap p = {{"Nueve", 9}, {"Diez", 10}};
     vmap::iterator it = n.push_back(p);
 
@@ -199,7 +124,7 @@ TEST_F(VectorMapTestInsertion, PushBack_vectormap) {
     EXPECT_EQ(it->second, 9);
 }
 
-TEST_F(VectorMapTestInsertion, PushFront_pair) {
+TEST_F(VectorMapTestInsertion, PushFrontPair) {
     const vmap::key_type k = "Nueve";
     const vmap::size_type v = 9;
     vmap::iterator it = n.push_front(std::make_pair(k, v));
@@ -213,7 +138,7 @@ TEST_F(VectorMapTestInsertion, PushFront_pair) {
     EXPECT_EQ(it->second, v);
 }
 
-TEST_F(VectorMapTestInsertion, PushFront_key_val) {
+TEST_F(VectorMapTestInsertion, PushFrontKeyVal) {
     const vmap::key_type k = "Nueve";
     const vmap::size_type v = 9;
     vmap::iterator it = n.push_front(k, v);
@@ -227,7 +152,7 @@ TEST_F(VectorMapTestInsertion, PushFront_key_val) {
     EXPECT_EQ(it->second, v);
 }
 
-TEST_F(VectorMapTestInsertion, PushFront_init_list) {
+TEST_F(VectorMapTestInsertion, PushFrontInitList) {
     vmap::iterator it = n.push_front({{"Nueve", 9}, {"Diez", 10}});
 
     EXPECT_EQ(n.size(), 11);
@@ -241,7 +166,7 @@ TEST_F(VectorMapTestInsertion, PushFront_init_list) {
     EXPECT_EQ(it->second, 9);
 }
 
-TEST_F(VectorMapTestInsertion, PushFront_vectormap) {
+TEST_F(VectorMapTestInsertion, PushFrontVectormap) {
     vmap p = {{"Nueve", 9}, {"Diez", 10}};
     vmap::iterator it = n.push_front(p);
 
