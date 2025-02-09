@@ -7,5 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(mylibs "C:/Users/luisp/Programacion/_libraries/C++")
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    set(mylibs "~/Programacion/_libraries/C++")
+endif()
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    set(mylibs "C:/Users/luisp/Programacion/_libraries/C++")
+endif()
+
 include_directories(include)
 add_subdirectory(tests)
