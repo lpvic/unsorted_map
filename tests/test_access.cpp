@@ -10,33 +10,35 @@ class VectorMapTestAccess : public ::testing::Test {
         vmap n = {{"Cero", 0}, {"Uno", 1}, {"Dos", 2}, {"Tres", 3}, {"Dos", 4}, {"Cinco", 5}, {"Seis", 6}, {"Dos", 7}, {"Ocho", 8}};
 };
 
-TEST_F(VectorMapTestAccess, GetPos) {
+TEST_F(VectorMapTestAccess, GetByPos) {
     vmap::iterator it = n.get(5);
 
     EXPECT_EQ(it->first, "Cinco");
     EXPECT_EQ(it->second, 5);
 }
 
-TEST_F(VectorMapTestAccess, GetKeyOrdNum) {
+TEST_F(VectorMapTestAccess, GetByKey) {
     std::vector<vmap::iterator_pos> v = n.get("Dos");
 
-    EXPECT_EQ(v.size(), 1);
+    ASSERT_EQ(v.size(), 1);
     EXPECT_EQ(v.at(0).first->first, "Dos");
     EXPECT_EQ(v.at(0).first->second, 2);
     EXPECT_EQ(v.at(0).second, 2);
+}
 
-    v.clear();
-    v = n.get("Dos", 2);
+TEST_F(VectorMapTestAccess, GetByKeyByOrd) {
+    std::vector<vmap::iterator_pos> v = n.get("Dos", 2);
 
-    EXPECT_EQ(v.size(), 1);
+    ASSERT_EQ(v.size(), 1);
     EXPECT_EQ(v.at(0).first->first, "Dos");
     EXPECT_EQ(v.at(0).first->second, 4);
     EXPECT_EQ(v.at(0).second, 4);
+}
 
-    v.clear();
-    v = n.get("Dos", 2, 2);
+TEST_F(VectorMapTestAccess, GetByKeyByOrdByNum) {
+    std::vector<vmap::iterator_pos> v = n.get("Dos", 2, 2);
 
-    EXPECT_EQ(v.size(), 2);
+    ASSERT_EQ(v.size(), 2);
     EXPECT_EQ(v.at(0).first->first, "Dos");
     EXPECT_EQ(v.at(0).first->second, 4);
     EXPECT_EQ(v.at(0).second, 4);
@@ -48,7 +50,7 @@ TEST_F(VectorMapTestAccess, GetKeyOrdNum) {
 TEST_F(VectorMapTestAccess, GetAll) {
     std::vector<vmap::iterator_pos> v = n.get_all("Dos");
 
-    EXPECT_EQ(v.size(), 3);
+    ASSERT_EQ(v.size(), 3);
     EXPECT_EQ(v.at(0).first->first, "Dos");
     EXPECT_EQ(v.at(0).first->second, 2);
     EXPECT_EQ(v.at(0).second, 2);
@@ -66,20 +68,22 @@ TEST_F(VectorMapTestAccess, GetValuePos) {
     EXPECT_EQ(m, 5);
 }
 
-TEST_F(VectorMapTestAccess, GetValueKeyOrdNum) {
+TEST_F(VectorMapTestAccess, GetValueByKey) {
     std::vector<vmap::mapped_type> v = n.get_value("Dos");
 
     ASSERT_EQ(v.size(), 1);
     EXPECT_EQ(v.at(0), 2);
+}
 
-    v.clear();
-    v = n.get_value("Dos", 2);
+TEST_F(VectorMapTestAccess, GetValueByKeyByOrd) {
+    std::vector<vmap::mapped_type> v = n.get_value("Dos", 2);
 
     ASSERT_EQ(v.size(), 1);
     EXPECT_EQ(v.at(0), 4);
+}
 
-    v.clear();
-    v = n.get_value("Dos", 2, 2);
+TEST_F(VectorMapTestAccess, GetValueByKeyByOrdByNum) {
+    std::vector<vmap::mapped_type> v = n.get_value("Dos", 2, 2);
 
     ASSERT_EQ(v.size(), 2);
     EXPECT_EQ(v.at(0), 4);
@@ -95,13 +99,49 @@ TEST_F(VectorMapTestAccess, GetAllValues) {
     EXPECT_EQ(v.at(2), 7);
 }
 
-TEST_F(VectorMapTestAccess, GetKeyPos) {
+TEST_F(VectorMapTestAccess, GetKeyByPos) {
     EXPECT_EQ(n.get_key(6), "Seis");
 }
 
-TEST_F(VectorMapTestAccess, GetPosKeyOrdNum) {
+TEST_F(VectorMapTestAccess, GetPosByKey) {
     std::vector<vmap::size_type> v = n.get_pos("Dos");
 
-    EXPECT_EQ(v.size(), 1);
+    ASSERT_EQ(v.size(), 1);
     EXPECT_EQ(v.at(0), 2);
+}
+
+TEST_F(VectorMapTestAccess, GetPosByKeyByOrd) {
+    std::vector<vmap::size_type> v = n.get_pos("Dos", 2);
+
+    ASSERT_EQ(v.size(), 1);
+    EXPECT_EQ(v.at(0), 4);
+}
+
+TEST_F(VectorMapTestAccess, GetPosByKeyByOrdByNum) {
+    std::vector<vmap::size_type> v = n.get_pos("Dos", 2, 2);
+
+    ASSERT_EQ(v.size(), 2);
+    EXPECT_EQ(v.at(0), 4);
+    EXPECT_EQ(v.at(1), 7);
+
+    v.clear();
+    v = n.get_pos("Dos", 2, 3);
+    ASSERT_EQ(v.size(), 2);
+    EXPECT_EQ(v.at(0), 4);
+    EXPECT_EQ(v.at(1), 7);
+
+
+    std::cerr << "\033[0;32m" << "[          ] " << "\033[0;0m" << "Hola" << std::endl;
+    v.clear();
+    v = n.get_pos("Dos", 4, 3);
+    ASSERT_EQ(v.size(), 0);
+}
+
+TEST_F(VectorMapTestAccess, GetAllPos) {
+    std::vector<vmap::size_type> v = n.get_all_pos("Dos");
+
+    ASSERT_EQ(v.size(), 3);
+    EXPECT_EQ(v.at(0), 2);
+    EXPECT_EQ(v.at(1), 4);
+    EXPECT_EQ(v.at(2), 7);
 }

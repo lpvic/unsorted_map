@@ -19,7 +19,7 @@ TEST_F(VectorMapTestConstructors, DefaultConstructor) {
 }
 
 TEST_F(VectorMapTestConstructors, ConstructorFromInitList) {
-    EXPECT_EQ(n.size(), 4);
+    ASSERT_EQ(n.size(), 4);
     EXPECT_EQ(n.capacity(), 6);
     EXPECT_EQ(n.data()[0].first, "Cero");
     EXPECT_EQ(n.data()[1].first, "Uno");
@@ -32,7 +32,7 @@ TEST_F(VectorMapTestConstructors, ConstructorFromInitList) {
 }
 
 TEST_F(VectorMapTestConstructors, CopyConstructor) {
-    EXPECT_EQ(p.size(), 4);
+    ASSERT_EQ(p.size(), 4);
     EXPECT_EQ(p.capacity(), 6);
     EXPECT_EQ(p.data()[0].first, "Cero");
     EXPECT_EQ(p.data()[1].first, "Uno");
@@ -45,7 +45,7 @@ TEST_F(VectorMapTestConstructors, CopyConstructor) {
 }
 
 TEST_F(VectorMapTestConstructors, MoveConstructor) {
-    EXPECT_EQ(r.size(), 4);
+    ASSERT_EQ(r.size(), 4);
     EXPECT_EQ(r.capacity(), 6);
     EXPECT_EQ(r.data()[0].first, "Cero");
     EXPECT_EQ(r.data()[1].first, "Uno");

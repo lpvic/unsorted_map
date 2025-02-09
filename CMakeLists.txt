@@ -5,8 +5,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(mylibs "C:/Users/luisp/Programacion/_libraries/C++")
-
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(mylibs "~/Programacion/_libraries/C++")
 endif()

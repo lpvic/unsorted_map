@@ -24,7 +24,14 @@ set(GTEST_MAIN_LIBRARY "${mylibs}/gtest/build/lib/libgtest_main.a")
 include_directories(${GTEST_INCLUDE_DIR})
 find_package(GTest REQUIRED)
 
-add_executable(tests test_access.cpp test_insertion.cpp test_constructors.cpp)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_executable(tests  test_constructors.cpp test_insertion.cpp test_access.cpp)
+endif()
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_executable(tests test_access.cpp test_insertion.cpp test_constructors.cpp)
+endif()
+
 target_link_libraries(tests GTest::gtest_main)
 set_target_properties(tests PROPERTIES 
     ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/output/lib/debug"
