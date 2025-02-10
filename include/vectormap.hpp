@@ -11,6 +11,10 @@
 #include <limits>
 #include <concepts>
 
+/**
+ * @brief General namespace
+ * 
+ */
 namespace com {
     template<class T>
     concept Keyable = (requires(T a_, T b_) {a_ == b_;}) && (!std::is_integral<T>::value);
